@@ -79,14 +79,21 @@ export function HomePage({ onNavigate, onOpenBooking }: HomePageProps) {
     setCurrentTestimonial((prev) => (prev - 1 + testimonials.length) % testimonials.length);
   };
 
-  const scrollToServices = () => {
-    document.getElementById("services-section")?.scrollIntoView({ behavior: "smooth" });
+  const handleNavigate = (page: string) => {
+    onNavigate(page);
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   };
+
 
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-primary via-primary to-secondary text-white overflow-hidden">
+      <section
+        className="relative bg-gradient-to-br from-primary via-primary to-secondary text-white overflow-hidden"
+        style={{ backgroundImage: "linear-gradient(135deg, #00c3ca 0%, #8c52ff 100%)" }}
+      >
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnptMCAzNmMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnoiIGZpbGw9IiNmZmYiLz48L2c+PC9zdmc+')] bg-repeat"></div>
         </div>
@@ -108,31 +115,7 @@ export function HomePage({ onNavigate, onOpenBooking }: HomePageProps) {
                 Expert regulatory advice and improvement support from experienced CQC inspectors.
                 We help your services be safe, effective, caring, responsive, and well-led.
               </p>
-              <div className="flex flex-wrap gap-4">
-                <Button
-                  size="lg"
-                  onClick={onOpenBooking}
-                  className="bg-white text-primary hover:bg-white/90"
-                >
-                  Book Now
-                </Button>
-                <Button
-                  size="lg"
-                  onClick={scrollToServices}
-                  variant="outline"
-                  className="border-white text-white hover:bg-white/10"
-                >
-                  Learn More
-                </Button>
-                <Button
-                  size="lg"
-                  onClick={() => onNavigate("contact")}
-                  variant="outline"
-                  className="border-white text-white hover:bg-white/10"
-                >
-                  Contact Us
-                </Button>
-              </div>
+              {/* Removed hero action buttons as requested */}
             </motion.div>
 
             <motion.div
@@ -143,7 +126,7 @@ export function HomePage({ onNavigate, onOpenBooking }: HomePageProps) {
             >
               <div className="rounded-2xl overflow-hidden shadow-2xl">
                 <ImageWithFallback
-                  src="https://images.unsplash.com/photo-1676552055618-22ec8cde399a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxoZWFsdGhjYXJlJTIwbnVyc2UlMjBwcm9mZXNzaW9uYWwlMjBzbWlsaW5nfGVufDF8fHx8MTc2MDI2Mjk2M3ww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+                  src="https://media.gettyimages.com/id/2170084233/photo/home-care-healthcare-professional-hugging-elderly-patient.jpg?s=612x612&w=0&k=20&c=AvWopqBNzNO2cg971OFY2LMD21J1HHkh6APoehev1hg="
                   alt="Professional healthcare consultant"
                   className="w-full h-auto"
                 />
@@ -280,7 +263,10 @@ export function HomePage({ onNavigate, onOpenBooking }: HomePageProps) {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 md:py-24 bg-gradient-to-r from-primary to-secondary text-white">
+      <section
+        className="py-16 md:py-24 bg-gradient-to-r from-primary to-secondary text-white"
+        style={{ backgroundImage: "linear-gradient(90deg, #00c3ca 0%, #8c52ff 100%)" }}
+      >
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-white mb-4">Ready to Improve Your Care Standards?</h2>
           <p className="text-xl mb-8 text-white/95 max-w-2xl mx-auto">
@@ -296,9 +282,9 @@ export function HomePage({ onNavigate, onOpenBooking }: HomePageProps) {
             </Button>
             <Button
               size="lg"
-              onClick={() => onNavigate("packages")}
+              onClick={() => handleNavigate("packages")}
               variant="outline"
-              className="border-white text-white hover:bg-white/10"
+              className="border-white text-white bg-transparent hover:bg-white/10 hover:text-white"
             >
               View Packages
             </Button>

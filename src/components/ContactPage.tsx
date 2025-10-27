@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -14,7 +14,7 @@ const contactInfo = [
   {
     icon: Phone,
     title: "Phone",
-    details: ["Mobile: 07359257530", "WhatsApp: 07404717002"],
+    details: ["Mobile: +447359257530", "WhatsApp: +447352453489"],
   },
   {
     icon: Mail,
@@ -24,12 +24,12 @@ const contactInfo = [
   {
     icon: Clock,
     title: "Business Hours",
-    details: ["Monday - Friday: 9:00 AM - 6:00 PM", "Saturday: 10:00 AM - 2:00 PM"],
+    details: ["Monday - Friday: 9:30 AM - 4:00 PM"],
   },
   {
     icon: MapPin,
     title: "Service Area",
-    details: ["UK-wide consultancy services", "On-site visits available"],
+    details: ["Preston Technology Centre", "Marsh Lane, Preston", "PR1 8UQ"],
   },
 ];
 
@@ -54,6 +54,14 @@ export function ContactPage() {
       message: "",
     });
   };
+
+  // Prefer iMessage/SMS on iOS when tapping the primary contact action
+  const [isIOS, setIsIOS] = useState(false);
+  useEffect(() => {
+    if (typeof navigator !== "undefined") {
+      setIsIOS(/iPad|iPhone|iPod/i.test(navigator.userAgent));
+    }
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
@@ -218,17 +226,32 @@ export function ContactPage() {
               viewport={{ once: true }}
               className="space-y-6"
             >
-              {/* Map placeholder */}
+              {/* Google Map */}
               <Card className="overflow-hidden">
-                <div className="aspect-video bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-                  <div className="text-center p-8">
-                    <MapPin className="w-12 h-12 text-primary mx-auto mb-4" />
-                    <h4 className="mb-2">UK-Wide Service</h4>
-                    <p className="text-muted-foreground">
-                      We provide consultancy services across the United Kingdom with on-site visits available
-                    </p>
-                  </div>
+                <div className="aspect-video">
+                  <iframe
+                    title="Office location map"
+                    src="https://www.google.com/maps?q=Preston%20Technology%20Centre%2C%20Marsh%20Lane%2C%20Preston%2C%20PR1%208UQ&output=embed"
+                    width="600"
+                    height="450"
+                    style={{ border: 0, width: "100%", height: "100%" }}
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
                 </div>
+                <CardContent className="p-4">
+                  <p className="text-sm text-muted-foreground">
+                    Preston Technology Centre, Marsh Lane, Preston, PR1 8UQ
+                  </p>
+                  <a
+                    className="text-sm text-primary underline underline-offset-4"
+                    href="https://www.google.com/maps/search/?api=1&query=Preston%20Technology%20Centre%2C%20Marsh%20Lane%2C%20Preston%2C%20PR1%208UQ"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    View on Google Maps
+                  </a>
+                </CardContent>
               </Card>
 
               {/* Quick Contact Options */}
@@ -241,7 +264,7 @@ export function ContactPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <a
-                    href="tel:07359257530"
+                    href={isIOS ? "sms:+447359257530" : "tel:+447359257530"}
                     className="flex items-center gap-4 p-4 rounded-lg border hover:bg-accent transition-colors"
                   >
                     <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
@@ -249,12 +272,12 @@ export function ContactPage() {
                     </div>
                     <div>
                       <p>Call us directly</p>
-                      <p className="text-sm text-muted-foreground">07359257530</p>
+                      <p className="text-sm text-muted-foreground">+447359257530</p>
                     </div>
                   </a>
 
                   <a
-                    href="https://wa.me/447404717002"
+                    href="https://wa.me/447352453489"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-4 p-4 rounded-lg border hover:bg-accent transition-colors"
@@ -264,12 +287,14 @@ export function ContactPage() {
                     </div>
                     <div>
                       <p>WhatsApp us</p>
-                      <p className="text-sm text-muted-foreground">07404717002</p>
+                      <p className="text-sm text-muted-foreground">+447352453489</p>
                     </div>
                   </a>
 
                   <a
-                    href="mailto:coach4improvement@gmail.com"
+                    href="https://mail.google.com/mail/?view=cm&fs=1&to=coach4improvement@gmail.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="flex items-center gap-4 p-4 rounded-lg border hover:bg-accent transition-colors"
                   >
                     <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
