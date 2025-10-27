@@ -1,15 +1,22 @@
 import { Phone, Mail, MapPin, MessageCircle } from "lucide-react";
+import LogoImage from "../assets/Asset 1.png";
 
 export function Footer() {
   return (
     <footer className="bg-gradient-to-r from-primary to-secondary text-white">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {/* Company Info */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
-                <span>C4i</span>
+              <div className="w-12 h-12 flex items-center justify-center overflow-hidden">
+                <img
+                  src={LogoImage}
+                  alt="Coach4Improvement logo"
+                  className="w-12 h-12 object-contain"
+                  loading="eager"
+                  decoding="sync"
+                />
               </div>
               <div>
                 <h4 className="text-white">Coach4Improvement</h4>
@@ -20,37 +27,6 @@ export function Footer() {
             </p>
           </div>
 
-          {/* Quick Links */}
-          <div>
-            <h4 className="mb-4 text-white">Quick Links</h4>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <a href="#home" className="text-white/90 hover:text-white transition-colors">
-                  Home
-                </a>
-              </li>
-              <li>
-                <a href="#about" className="text-white/90 hover:text-white transition-colors">
-                  About Us
-                </a>
-              </li>
-              <li>
-                <a href="#services" className="text-white/90 hover:text-white transition-colors">
-                  Services
-                </a>
-              </li>
-              <li>
-                <a href="#packages" className="text-white/90 hover:text-white transition-colors">
-                  Packages & Pricing
-                </a>
-              </li>
-              <li>
-                <a href="#contact" className="text-white/90 hover:text-white transition-colors">
-                  Contact
-                </a>
-              </li>
-            </ul>
-          </div>
 
           {/* Services */}
           <div>
@@ -72,8 +48,8 @@ export function Footer() {
               <li className="flex items-start gap-2">
                 <Phone className="w-5 h-5 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="text-white/90">Mobile: 07359257530</p>
-                  <p className="text-white/90">WhatsApp: 07404717002</p>
+                  <p className="text-white/90">Mobile: +447359257530</p>
+                  <p className="text-white/90">WhatsApp/Text: +447352453489</p>
                 </div>
               </li>
               <li className="flex items-start gap-2">
@@ -85,7 +61,7 @@ export function Footer() {
               <li className="flex items-start gap-2">
                 <MessageCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
                 <a
-                  href="https://wa.me/447404717002"
+                  href="https://wa.me/447352453489"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-white/90 hover:text-white transition-colors"
@@ -101,7 +77,7 @@ export function Footer() {
         <div className="border-t border-white/20 mt-8 pt-8 text-center text-sm text-white/80">
           <p>© 2025 Coach4Improvement (C4i) Care Consultancy. All rights reserved.</p>
           <p className="mt-2">
-            GDPR Compliant | Your data is safe and secure with us
+           Developed by{' Praise Ekpo'}
           </p>
         </div>
       </div>
