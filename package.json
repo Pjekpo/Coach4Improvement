@@ -56,8 +56,6 @@
       },
       "scripts": {
             "dev": "vite",
-            "build": "vite build",
-            "predeploy": "npm run build",
-            "deploy": "main -d dist"
+            "build": "vite build"
       }
 }
