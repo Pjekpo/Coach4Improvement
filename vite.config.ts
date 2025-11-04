@@ -2,9 +2,34 @@
   import { defineConfig } from 'vite';
   import react from '@vitejs/plugin-react-swc';
   import path from 'path';
+  import fs from 'fs';
+
+  // Serve and bundle favicon without needing a public/ copy
+  const faviconPlugin = () => ({
+    name: 'favicon-plugin',
+    configureServer(server) {
+      const src = path.resolve(__dirname, 'src/assets/favicon.ico');
+      server.middlewares.use('/favicon.ico', (req, res, next) => {
+        fs.readFile(src, (err, data) => {
+          if (err) return next();
+          res.setHeader('Content-Type', 'image/x-icon');
+          res.end(data);
+        });
+      });
+    },
+    generateBundle() {
+      const src = path.resolve(__dirname, 'src/assets/favicon.ico');
+      try {
+        const data = fs.readFileSync(src);
+        this.emitFile({ type: 'asset', fileName: 'favicon.ico', source: data });
+      } catch (_) {
+        // If the file is missing, skip silently
+      }
+    },
+  });
 
   export default defineConfig({
-    plugins: [react()],
+    plugins: [react(), faviconPlugin()],
     base:"/",
     resolve: {
       extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
