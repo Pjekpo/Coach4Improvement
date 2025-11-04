@@ -83,7 +83,7 @@ const additionalServices = [
   {
     name: "Mock CQC Inspection",
     price: "£650",
-    description: "Comprehensive inspection simulation with detailed feedback",
+    description: "Comprehensive inspection simulation following the current CQC regulatory framework, using KLOEs or current Quality Statements. We offer detailed feedback throughout the process and an action plan with specific guidance on rectifying shortfalls.",
   },
   {
     name: "Medicines Audit",
@@ -178,7 +178,8 @@ export function PackagesPage({ onOpenBooking }: PackagesPageProps) {
                   <CardHeader className="text-center pb-8">
                     <CardTitle className="text-2xl mb-2">{pkg.name}</CardTitle>
                     <CardDescription className="mb-4">{pkg.description}</CardDescription>
-                    <div className="mb-2">
+                    <div className="mb-2"><span className="text-lg">Get in touch for pricing</span></div>
+                    <div className="mb-2 hidden">
                       <span className="text-4xl">
                         £{isAnnual ? pkg.annualPrice : pkg.monthlyPrice}
                       </span>
@@ -186,7 +187,7 @@ export function PackagesPage({ onOpenBooking }: PackagesPageProps) {
                         /{isAnnual ? "year" : "month"}
                       </span>
                     </div>
-                    {isAnnual && (
+                    {false && (
                       <p className="text-sm text-muted-foreground">
                         Save {calculateSavings(pkg.monthlyPrice, pkg.annualPrice)}%
                       </p>
@@ -223,8 +224,8 @@ export function PackagesPage({ onOpenBooking }: PackagesPageProps) {
       <section className="py-16 bg-accent">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="mb-4">One-off Services</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
+            <h2 className="mb-4 text-white">One-off Services</h2>
+            <p className="text-white/90 max-w-2xl mx-auto">
               Need specific support without a subscription? We offer individual services tailored to your needs.
             </p>
           </div>
@@ -241,12 +242,20 @@ export function PackagesPage({ onOpenBooking }: PackagesPageProps) {
                 <Card className="h-full hover:shadow-lg transition-shadow">
                   <CardHeader>
                     <div className="flex items-start justify-between mb-2">
-                      <CardTitle className="text-lg">{service.name}</CardTitle>
+                      <CardTitle className="text-lg">
+                        {service.name === "CQC Registration Support" ? "CQC Enforcement Support" : service.name}
+                      </CardTitle>
                       <Badge variant="outline" className="text-primary border-primary">
-                        {service.price}
+                        {service.name === "Staff Training Session" ? "£350" : "Get in touch for pricing"}
                       </Badge>
                     </div>
-                    <CardDescription>{service.description}</CardDescription>
+                    <CardDescription>
+                      {service.name === "Staff Training Session"
+                        ? "Half-day on-site training for your team (per session). We can offer Teams Coaching online in various areas as required including Safeguarding, MCA/DoLS, Care Planning, Auditing and NI responsibilities."
+                        : service.name === "CQC Registration Support"
+                        ? "We have expert experiences in CQC and CIW enforcement processes. Expert guidance when facing CQC enforcement actions, helping you respond effectively. Our Consultants and Directors have experience of ALL levels of enforcement including Requirement Notices, Warning Notices, Notice of decisions, Letter of Intent, Notice of Decisions and Regulations 12 and Regulation 22 Offences Criminal Investigations. We will support providers through the process and what evidence they need to prepare to respond to these."
+                        : service.description}
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <Button onClick={onOpenBooking} variant="outline" className="w-full">

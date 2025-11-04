@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/
 import {
   ClipboardCheck,
   Shield,
-  Award,
   Heart,
   Users,
   TrendingUp,
@@ -25,18 +24,21 @@ interface HomePageProps {
 const services = [
   {
     icon: ClipboardCheck,
-    title: "CQC Support",
-    description: "Expert guidance for CQC inspections, ratings, and registration forms",
+    title: "CQC regulatory Support",
+    description:
+      "Expert guidance on preparing for meeting the fundamental standards of care and understanding regulatory requirements. We do not just want providers to be compliant with CQC inspections but for providers to offer people positive experiences and outcomes. Our service help you sustain Good and Outstanding ratings and improve Requires Improvement Services. We offer support in the completion of registration forms and guidance on reporting incidents and developing lessons learnt processes.",
   },
   {
     icon: Shield,
-    title: "Health & Safety Audits",
-    description: "Comprehensive audits including medicines, IPC, and governance",
+    title: "Support with Provider and Registered Manager Registration Forms for CQC",
+    description:
+      "Complete assistance with CQC registration application processes including drafting policies and statements of purpose. We support you navigate the complex registration process ensuring all requirements are met including support for managers and Nominated individuals on their responsibilities.",
   },
   {
     icon: TrendingUp,
-    title: "Crisis Turnaround",
-    description: "Rapid intervention to identify root causes and deliver improvement plans",
+    title: "Medicines Optimisation Audits",
+    description:
+      "Comprehensive medicines management audits to ensure safe administration, and storage of medications in your care setting. We support providers to ensure they follow NICE Guidance on Medicines Management both in care homes and in the community. Includes: MAR chart reviews; Storage audits; Policy compliance; Staff competency checks.",
   },
 ];
 
@@ -62,8 +64,7 @@ const testimonials = [
 ];
 
 const partners = [
-  { name: "CQC Registered", icon: Award },
-  { name: "7+ Years Experience", icon: Shield },
+  { name: "24+ Years Experience", icon: Shield },
   { name: "100+ Clients Served", icon: Users },
   { name: "Expert-Led", icon: Star },
 ];
@@ -105,16 +106,21 @@ export function HomePage({ onNavigate, onOpenBooking }: HomePageProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <h1 className="text-white mb-4">
-                Solution Focused Care Consultancy
-              </h1>
-              <p className="text-xl md:text-2xl mb-6 text-white/95">
-                Personalised Health and Social Care Compliance & Improvement Services
-              </p>
-              <p className="mb-8 text-white/90">
-                Expert regulatory advice and improvement support from experienced CQC inspectors.
-                We help your services be safe, effective, caring, responsive, and well-led.
-              </p>
+              <h1 className="text-white mb-4">Solution Focused Care Consultancy</h1>
+              <div className="text-white/95 mb-8 space-y-4">
+                <p>
+                  We deliver specialised <strong>Regulatory Care consultancy</strong> for all <strong>CQC-registered services</strong> across England and CIW- Wales, supporting both care homes and domiciliary care providers. What sets us apart is our dual foundation: a supportive <strong>Coaching approach</strong> and deep <strong>Social Work expertise</strong>, ensuring our support drives <strong>meaningful, sustained improvement</strong>, not just compliance.
+                </p>
+                <p>
+                  We partner with you from day one, offering seamless <strong>registration support</strong> for new providers or changes to your Statement of Purpose.
+                </p>
+                <p>
+                  Our services include thorough <strong>CQC-style mock inspections</strong> and tailored action plans to assure regulatory excellence. We conduct full regulatory and specific area audits (covering high-risk areas like Risk management, MCA/DoLS, Staffing, medicines, IPC, and governance), providing you with a clear roadmap to improvements.
+                </p>
+                <p>
+                  When challenges occur, we leverage our social work background to provide expert, independent support, including conducting <strong>safeguarding and whistleblowing investigations</strong> and drafting detailed, professional responses to regulators such as CQC, CIW, and Ofsted. Furthermore, our <strong>crisis turnaround package</strong> offers detailed root-cause analysis after poor ratings or critical incidents, working directly with Registered Managers and Providers to embed and sustain lasting positive change. We support you to focus on people who receive care and their outcomes; it is not just about compliance with regulations.
+                </p>
+              </div>
               {/* Removed hero action buttons as requested */}
             </motion.div>
 
@@ -139,7 +145,7 @@ export function HomePage({ onNavigate, onOpenBooking }: HomePageProps) {
       {/* Partners/Trust Section */}
       <section className="py-12 bg-accent">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-12">
             {partners.map((partner, index) => (
               <motion.div
                 key={index}
@@ -150,7 +156,7 @@ export function HomePage({ onNavigate, onOpenBooking }: HomePageProps) {
                 className="flex flex-col items-center text-center"
               >
                 <partner.icon className="w-12 h-12 text-primary mb-2" />
-                <p className="text-sm text-muted-foreground">{partner.name}</p>
+                <p className="text-sm text-white">{partner.name}</p>
               </motion.div>
             ))}
           </div>

@@ -8,9 +8,10 @@ import LogoImage from "../assets/Asset 1.png";
 interface HeaderProps {
   currentPage: string;
   onNavigate: (page: string) => void;
+  onOpenBooking: () => void;
 }
 
-export function Header({ currentPage, onNavigate }: HeaderProps) {
+export function Header({ currentPage, onNavigate, onOpenBooking }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleNavigate = (page: string) => {
@@ -79,7 +80,7 @@ export function Header({ currentPage, onNavigate }: HeaderProps) {
           </nav>
 
           <div className="hidden lg:block">
-            <Button onClick={() => handleNavigate("contact")} size="lg">
+            <Button onClick={onOpenBooking} size="lg">
               Book Consultation
             </Button>
           </div>
@@ -114,8 +115,8 @@ export function Header({ currentPage, onNavigate }: HeaderProps) {
             ))}
             <Button
               onClick={() => {
-                handleNavigate("contact");
                 setMobileMenuOpen(false);
+                onOpenBooking();
               }}
               className="w-full mt-4"
               size="lg"

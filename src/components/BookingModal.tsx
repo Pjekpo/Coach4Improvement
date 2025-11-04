@@ -67,7 +67,48 @@ export function BookingModal({ open, onClose }: BookingModalProps) {
   };
 
   const handleSubmit = () => {
-    toast.success("Booking confirmed! You'll receive a confirmation email shortly.");
+    try {
+      const to = "praiseekpo2@gmail.com";
+      const subject = `New Consultation Booking – ${bookingData.name || "Unknown"}`;
+      const lines = [
+        "A new booking has been submitted:",
+        "",
+        `Name: ${bookingData.name}`,
+        `Email: ${bookingData.email}`,
+        `Organisation: ${bookingData.organisation || "N/A"}`,
+        `Phone: ${bookingData.phone || "N/A"}`,
+        `Service: ${bookingData.service || "N/A"}`,
+        `Preferred Date: ${selectedDate ? selectedDate.toDateString() : "N/A"}`,
+        `Preferred Time: ${bookingData.timeSlot || "N/A"}`,
+        `Payment Method: ${bookingData.paymentMethod}`,
+        "",
+        "Message:",
+        bookingData.message || "(none)",
+      ];
+      const body = lines.join("\n");
+
+      const webhook = (import.meta as any).env?.VITE_EMAIL_WEBHOOK_URL as string | undefined;
+
+      if (webhook) {
+        // Optional: post to a backend/webhook if configured
+        fetch(webhook, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ to, subject, body }),
+        }).catch(() => {});
+      }
+
+      // Always trigger a mail client as a fallback/delivery path
+      const mailto = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      if (typeof window !== "undefined") {
+        window.location.href = mailto;
+      }
+
+      toast.success("Booking details prepared in your email client.");
+    } catch (e) {
+      toast.error("Could not prepare the email. Please try again.");
+    }
+
     onClose();
     // Reset form
     setStep(1);
@@ -321,7 +362,7 @@ export function BookingModal({ open, onClose }: BookingModalProps) {
               {bookingData.paymentMethod === "invoice" && (
                 <Card className="bg-accent">
                   <CardContent className="pt-6">
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-white/90">
                       An invoice will be sent to your email address. Payment is due within 7 days of the consultation date.
                     </p>
                   </CardContent>

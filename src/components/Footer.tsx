@@ -5,7 +5,7 @@ export function Footer() {
   return (
     <footer className="bg-gradient-to-r from-primary to-secondary text-white">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Company Info */}
           <div>
             <div className="flex items-center gap-2 mb-4">
@@ -27,20 +27,7 @@ export function Footer() {
             </p>
           </div>
 
-
-          {/* Services */}
-          <div>
-            <h4 className="mb-4 text-white">Our Services</h4>
-            <ul className="space-y-2 text-sm text-white/90">
-              <li>CQC Support</li>
-              <li>Health & Safety Audits</li>
-              <li>Medicines Optimisation</li>
-              <li>Safeguarding Reviews</li>
-              <li>Crisis Turnaround</li>
-              <li>Compliance Support</li>
-            </ul>
-          </div>
-
+          
           {/* Contact Info */}
           <div>
             <h4 className="mb-4 text-white">Contact Us</h4>

@@ -32,7 +32,7 @@ const values = [
 ];
 
 const qualifications = [
-  "7+ years experience as CQC Adult Social Care Inspector",
+  "24+ years experience as CQC Adult Social Care Inspector",
   "Background in Mental Health and Social Work",
   "Expert in Adult Social Work and Mental Health Social Work",
   "Specialist in learning disability and mental health services",
@@ -79,7 +79,7 @@ export function AboutPage() {
                   <strong className="text-foreground">Coach4Improvement (C4i) Care Consultancy</strong> is a leading Health and Social Care Consultancy specialising in offering personalised Health and Social Care Regulatory Improvement and compliance services tailored to each client and their needs.
                 </p>
                 <p>
-                  We provide expert regulatory advice, consultancy and improvement support for adults' social care, health providers. With vast experience in Social Care ranging from Adult Social Work, Mental Health Social Work to 7 years as a CQC Adult Social Care Inspector, our team brings unparalleled expertise to every engagement.
+                  We provide expert regulatory advice, consultancy and improvement support for adults' social care, health providers. With vast experience in Social Care ranging from Adult Social Work, Mental Health Social Work to 24 years as a CQC Adult Social Care Inspector, our team brings unparalleled expertise to every engagement.
                 </p>
                 <p>
                   We support services with full-service audits, specific area audits (medicines, health and safety, IPC audits, governance audits). We have a crisis turnaround package with detailed investigations to find the root cause after incidents or poor inspection rating.
@@ -111,8 +111,8 @@ export function AboutPage() {
       {/* Mission Section */}
       <section className="py-16 bg-accent">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="mb-6">Our Mission</h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-12">
+          <h2 className="mb-6 text-white">Our Mission</h2>
+          <p className="text-xl text-white/90 max-w-3xl mx-auto mb-12">
             We help you assess your current Health and Social Care Act (2014) regulatory performance and develop and deliver improvement plans to help your services be safe, effective, caring, responsive and well-led.
           </p>
 

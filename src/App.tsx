@@ -34,7 +34,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header currentPage={currentPage} onNavigate={setCurrentPage} />
+      <Header currentPage={currentPage} onNavigate={setCurrentPage} onOpenBooking={() => setBookingModalOpen(true)} />
       <main className="flex-1">
         {renderPage()}
       </main>
