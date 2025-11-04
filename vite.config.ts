@@ -5,7 +5,7 @@
 
   export default defineConfig({
     plugins: [react()],
-    base:"/Coach4Improvement/",
+    base:"/",
     resolve: {
       extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
       alias: {
