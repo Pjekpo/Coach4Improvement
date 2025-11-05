@@ -1,5 +1,0 @@
-﻿{
-  "Description": "Domain ownership verification file for Microsoft 365 - place in the website root",
-  "Domain": "coach4improvement.co.uk",
-  "Id": "54e20b37-564e-430d-98d9-d90e2810ce01"
-}
