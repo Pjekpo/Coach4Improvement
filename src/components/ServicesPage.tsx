@@ -13,6 +13,7 @@ import {
   Calendar,
 } from "lucide-react";
 import { motion } from "motion/react";
+import { Helmet } from "react-helmet-async";
 
 interface ServicesPageProps {
   onOpenBooking: () => void;
@@ -115,6 +116,11 @@ const services = [
 export function ServicesPage({ onOpenBooking }: ServicesPageProps) {
   return (
     <div className="min-h-screen">
+      <Helmet>
+        <title>Services | CQC Compliance, Mock Inspections & Coaching Support</title>
+        <meta name="description" content="CQC mock inspections, full regulatory audits, enforcement response support, registration guidance and mindset coaching services for care providers and professionals." />
+        <meta name="keywords" content="CQC mock inspection service, CQC audit support, care home compliance services, regulatory training, coaching for registered managers, enforcement response support" />
+      </Helmet>
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-primary via-primary to-secondary text-white py-16">
         <div className="container mx-auto px-4 text-center">

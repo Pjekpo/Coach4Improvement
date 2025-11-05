@@ -8,6 +8,7 @@ import { Switch } from "./ui/switch";
 import { Label } from "./ui/label";
 import { Check, Star } from "lucide-react";
 import { motion } from "motion/react";
+import { Helmet } from "react-helmet-async";
 
 interface PackagesPageProps {
   onOpenBooking: () => void;
@@ -108,6 +109,11 @@ export function PackagesPage({ onOpenBooking }: PackagesPageProps) {
 
   return (
     <div className="min-h-screen">
+      <Helmet>
+        <title>Packages | CQC Audit, Registration & Coaching Support Plans</title>
+        <meta name="description" content="Flexible packages for CQC audits, care home compliance reviews, provider registration support, crisis turnaround plans and leadership coaching." />
+        <meta name="keywords" content="CQC audit packages, registration support pricing, enforcement recovery package, accountability coaching plan, care provider consultancy packages" />
+      </Helmet>
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-primary via-primary to-secondary text-white py-16">
         <div className="container mx-auto px-4 text-center">

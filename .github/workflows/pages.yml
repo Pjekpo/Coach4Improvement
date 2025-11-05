@@ -36,6 +36,9 @@ jobs:
       - name: Copy sitemap into build
         run: cp sitemap.xml build/sitemap.xml
 
+      - name: Create SPA fallback for deep links
+        run: cp build/index.html build/404.html
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

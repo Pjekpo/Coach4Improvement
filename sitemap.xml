@@ -2,8 +2,17 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://coach4improvement.co.uk/</loc>
-    <priority>1.0</priority>
-    <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>https://coach4improvement.co.uk/about</loc>
+  </url>
+  <url>
+    <loc>https://coach4improvement.co.uk/services</loc>
+  </url>
+  <url>
+    <loc>https://coach4improvement.co.uk/packages</loc>
+  </url>
+  <url>
+    <loc>https://coach4improvement.co.uk/contact</loc>
   </url>
 </urlset>
-

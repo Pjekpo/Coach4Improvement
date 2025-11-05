@@ -1,33 +1,30 @@
 "use client";
 
 import { useState } from "react";
+import { NavLink } from "react-router-dom";
 import { Menu, X, Phone, Mail } from "lucide-react";
 import { Button } from "./ui/button";
 import LogoImage from "../assets/Asset 1.png";
 
 interface HeaderProps {
-  currentPage: string;
-  onNavigate: (page: string) => void;
   onOpenBooking: () => void;
 }
 
-export function Header({ currentPage, onNavigate, onOpenBooking }: HeaderProps) {
+export function Header({ onOpenBooking }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const handleNavigate = (page: string) => {
-    onNavigate(page);
-    if (typeof window !== "undefined") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  };
-
   const navLinks = [
-    { name: "Home", href: "home" },
-    { name: "About Us", href: "about" },
-    { name: "Services", href: "services" },
-    { name: "Packages", href: "packages" },
-    { name: "Contact", href: "contact" },
+    { name: "Home", to: "/" },
+    { name: "About Us", to: "/about" },
+    { name: "Services", to: "/services" },
+    { name: "Packages", to: "/packages" },
+    { name: "Contact", to: "/contact" },
   ];
+
+  const linkClass = ({ isActive }: { isActive: boolean }) =>
+    `px-4 py-2 rounded-lg transition-colors ${
+      isActive ? "bg-primary text-primary-foreground" : "hover:bg-accent hover:text-accent-foreground"
+    }`;
 
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm">
@@ -65,17 +62,9 @@ export function Header({ currentPage, onNavigate, onOpenBooking }: HeaderProps) 
           {/* Desktop navigation */}
           <nav className="hidden lg:flex items-center gap-1">
             {navLinks.map((link) => (
-              <button
-                key={link.href}
-                onClick={() => handleNavigate(link.href)}
-                className={`px-4 py-2 rounded-lg transition-colors ${
-                  currentPage === link.href
-                    ? "bg-primary text-primary-foreground"
-                    : "hover:bg-accent hover:text-accent-foreground"
-                }`}
-              >
+              <NavLink key={link.to} to={link.to} className={linkClass}>
                 {link.name}
-              </button>
+              </NavLink>
             ))}
           </nav>
 
@@ -98,20 +87,18 @@ export function Header({ currentPage, onNavigate, onOpenBooking }: HeaderProps) 
         {mobileMenuOpen && (
           <nav className="lg:hidden py-4 border-t border-gray-200">
             {navLinks.map((link) => (
-              <button
-                key={link.href}
-                onClick={() => {
-                  handleNavigate(link.href);
-                  setMobileMenuOpen(false);
-                }}
-                className={`block w-full text-left px-4 py-3 rounded-lg transition-colors ${
-                  currentPage === link.href
-                    ? "bg-primary text-primary-foreground"
-                    : "hover:bg-accent"
-                }`}
+              <NavLink
+                key={link.to}
+                to={link.to}
+                className={({ isActive }) =>
+                  `block w-full text-left px-4 py-3 rounded-lg transition-colors ${
+                    isActive ? "bg-primary text-primary-foreground" : "hover:bg-accent"
+                  }`
+                }
+                onClick={() => setMobileMenuOpen(false)}
               >
                 {link.name}
-              </button>
+              </NavLink>
             ))}
             <Button
               onClick={() => {

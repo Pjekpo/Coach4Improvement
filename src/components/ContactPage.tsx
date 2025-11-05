@@ -8,6 +8,7 @@ import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { Phone, Mail, MapPin, MessageCircle, Clock, Send } from "lucide-react";
 import { motion } from "motion/react";
+import { Helmet } from "react-helmet-async";
 import { toast } from "sonner@2.0.3";
 
 const contactInfo = [
@@ -72,6 +73,11 @@ export function ContactPage() {
 
   return (
     <div className="min-h-screen">
+      <Helmet>
+        <title>Contact Us | Book CQC Consultancy or Coaching Support</title>
+        <meta name="description" content="Request CQC consultancy, book a mock inspection, schedule registration support or arrange 1-to-1 coaching. Get expert guidance for care providers across the UK." />
+        <meta name="keywords" content="book CQC support, request mock inspection, contact compliance consultant, coaching enquiry, care home audit quote" />
+      </Helmet>
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-primary via-primary to-secondary text-white py-16">
         <div className="container mx-auto px-4 text-center">

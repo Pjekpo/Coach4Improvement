@@ -2,6 +2,7 @@ import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Card, CardContent } from "./ui/card";
 import { Award, Heart, Users, Target, Shield, TrendingUp } from "lucide-react";
 import { motion } from "motion/react";
+import { Helmet } from "react-helmet-async";
 
 const values = [
   {
@@ -43,6 +44,11 @@ const qualifications = [
 export function AboutPage() {
   return (
     <div className="min-h-screen">
+      <Helmet>
+        <title>About Us | Coach4Improvement Care Consultancy & Coaching</title>
+        <meta name="description" content="With expertise in CQC regulatory support, compliance improvement and leadership coaching, Coach4Improvement helps care providers and professionals achieve high quality standards." />
+        <meta name="keywords" content="quality improvement consultant CQC, regulatory guidance care services, personal development coach, health and social care compliance expert" />
+      </Helmet>
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-primary via-primary to-secondary text-white py-16">
         <div className="container mx-auto px-4 text-center">
