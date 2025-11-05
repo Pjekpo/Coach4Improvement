@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://coach4improvement.co.uk/sitemap.xml
