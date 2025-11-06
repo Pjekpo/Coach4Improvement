@@ -9,6 +9,7 @@ import { Label } from "./ui/label";
 import { Check, Star } from "lucide-react";
 import { motion } from "motion/react";
 import { Helmet } from "react-helmet-async";
+import { Link } from "react-router-dom";
 
 interface PackagesPageProps {
   onOpenBooking: () => void;
@@ -113,6 +114,77 @@ export function PackagesPage({ onOpenBooking }: PackagesPageProps) {
         <title>Packages | CQC Audit, Registration & Coaching Support Plans</title>
         <meta name="description" content="Flexible packages for CQC audits, care home compliance reviews, provider registration support, crisis turnaround plans and leadership coaching." />
         <meta name="keywords" content="CQC audit packages, registration support pricing, enforcement recovery package, accountability coaching plan, care provider consultancy packages" />
+        <link rel="canonical" href="https://coach4improvement.co.uk/packages" />
+        {/* TODO: Add /public/og-packages.jpg for link previews. */}
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Packages | CQC Audit, Registration & Coaching Plans" />
+        <meta property="og:description" content="Flexible CQC consultancy packages for audits, registration, crisis turnaround and leadership coaching." />
+        <meta property="og:url" content="https://coach4improvement.co.uk/packages" />
+        <meta property="og:image" content="https://coach4improvement.co.uk/og-packages.jpg" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Packages | CQC Audit, Registration & Coaching Plans" />
+        <meta name="twitter:description" content="Flexible CQC consultancy packages for audits, registration, crisis turnaround and leadership coaching." />
+        <meta name="twitter:image" content="https://coach4improvement.co.uk/og-packages.jpg" />
+        <script type="application/ld+json">
+          {JSON.stringify(
+            {
+              "@context": "https://schema.org",
+              "@type": "OfferCatalog",
+              name: "CQC Consultancy Packages",
+              url: "https://coach4improvement.co.uk/packages",
+              itemListElement: [
+                {
+                  "@type": "Offer",
+                  name: "Basic",
+                  price: 299,
+                  priceCurrency: "GBP",
+                  availability: "https://schema.org/InStock",
+                  url: "https://coach4improvement.co.uk/packages?plan=basic",
+                  itemOffered: { "@type": "Service", name: "CQC Consultancy Subscription" }
+                },
+                {
+                  "@type": "Offer",
+                  name: "Standard",
+                  price: 599,
+                  priceCurrency: "GBP",
+                  availability: "https://schema.org/InStock",
+                  url: "https://coach4improvement.co.uk/packages?plan=standard",
+                  itemOffered: { "@type": "Service", name: "CQC Consultancy Subscription" }
+                },
+                {
+                  "@type": "Offer",
+                  name: "Premium",
+                  price: 999,
+                  priceCurrency: "GBP",
+                  availability: "https://schema.org/InStock",
+                  url: "https://coach4improvement.co.uk/packages?plan=premium",
+                  itemOffered: { "@type": "Service", name: "CQC Consultancy Subscription" }
+                }
+              ]
+            },
+            null,
+            2
+          )}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify(
+            {
+              "@context": "https://schema.org",
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                { "@type": "ListItem", position: 1, name: "Home", item: "https://coach4improvement.co.uk/" },
+                { "@type": "ListItem", position: 2, name: "Packages", item: "https://coach4improvement.co.uk/packages" }
+              ]
+            },
+            null,
+            2
+          )}
+        </script>
+      </Helmet>
+      <Helmet>
+        <title>Packages | CQC Audit, Registration & Coaching Support Plans</title>
+        <meta name="description" content="Flexible packages for CQC audits, care home compliance reviews, provider registration support, crisis turnaround plans and leadership coaching." />
+        <meta name="keywords" content="CQC audit packages, registration support pricing, enforcement recovery package, accountability coaching plan, care provider consultancy packages" />
       </Helmet>
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-primary via-primary to-secondary text-white py-16">
@@ -122,7 +194,7 @@ export function PackagesPage({ onOpenBooking }: PackagesPageProps) {
             animate={{ opacity: 1, y: 0 }}
             className="text-white mb-4"
           >
-            Packages & Pricing
+            CQC Audit, Registration & Coaching Packages
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -132,6 +204,16 @@ export function PackagesPage({ onOpenBooking }: PackagesPageProps) {
           >
             Choose the right support package for your care service. Flexible monthly or annual subscriptions.
           </motion.p>
+        </div>
+      </section>
+
+      {/* SEO: Internal links */}
+      <section className="py-8">
+        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
+          <p>
+            Need more details on what’s included? Review our <Link className="underline" to="/services">CQC services</Link> or
+            {' '}<Link className="underline" to="/contact">talk to a consultant</Link>.
+          </p>
         </div>
       </section>
 

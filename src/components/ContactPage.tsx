@@ -9,6 +9,7 @@ import { Textarea } from "./ui/textarea";
 import { Phone, Mail, MapPin, MessageCircle, Clock, Send } from "lucide-react";
 import { motion } from "motion/react";
 import { Helmet } from "react-helmet-async";
+import { Link } from "react-router-dom";
 import { toast } from "sonner@2.0.3";
 
 const contactInfo = [
@@ -77,6 +78,53 @@ export function ContactPage() {
         <title>Contact Us | Book CQC Consultancy or Coaching Support</title>
         <meta name="description" content="Request CQC consultancy, book a mock inspection, schedule registration support or arrange 1-to-1 coaching. Get expert guidance for care providers across the UK." />
         <meta name="keywords" content="book CQC support, request mock inspection, contact compliance consultant, coaching enquiry, care home audit quote" />
+        <link rel="canonical" href="https://coach4improvement.co.uk/contact" />
+        {/* TODO: Add /public/og-contact.jpg for link previews. */}
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Contact | Book CQC Consultancy or Coaching" />
+        <meta property="og:description" content="Request CQC consultancy, book a mock inspection, schedule registration support or arrange 1‑to‑1 coaching." />
+        <meta property="og:url" content="https://coach4improvement.co.uk/contact" />
+        <meta property="og:image" content="https://coach4improvement.co.uk/og-contact.jpg" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Contact | Book CQC Consultancy or Coaching" />
+        <meta name="twitter:description" content="Request CQC consultancy, book a mock inspection, schedule registration support or arrange 1‑to‑1 coaching." />
+        <meta name="twitter:image" content="https://coach4improvement.co.uk/og-contact.jpg" />
+        <script type="application/ld+json">
+          {JSON.stringify(
+            {
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              name: "Coach4Improvement Care Consultancy",
+              url: "https://coach4improvement.co.uk/contact",
+              contactPoint: [
+                {
+                  "@type": "ContactPoint",
+                  contactType: "customer service",
+                  telephone: "+44 7359 257530",
+                  email: "coach4improvement@gmail.com",
+                  areaServed: "GB",
+                  availableLanguage: ["en"]
+                }
+              ]
+            },
+            null,
+            2
+          )}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify(
+            {
+              "@context": "https://schema.org",
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                { "@type": "ListItem", position: 1, name: "Home", item: "https://coach4improvement.co.uk/" },
+                { "@type": "ListItem", position: 2, name: "Contact", item: "https://coach4improvement.co.uk/contact" }
+              ]
+            },
+            null,
+            2
+          )}
+        </script>
       </Helmet>
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-primary via-primary to-secondary text-white py-16">
@@ -86,7 +134,7 @@ export function ContactPage() {
             animate={{ opacity: 1, y: 0 }}
             className="text-white mb-4"
           >
-            Contact Us
+            Contact Our CQC Consultants
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -96,6 +144,16 @@ export function ContactPage() {
           >
             Get in touch with our team of experts. We're here to help you achieve excellence in care.
           </motion.p>
+        </div>
+      </section>
+
+      {/* SEO: Internal links */}
+      <section className="py-8">
+        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
+          <p>
+            Prefer to browse first? Explore our <Link className="underline" to="/services">CQC services</Link> or
+            {' '}see <Link className="underline" to="/packages">packages and pricing</Link>.
+          </p>
         </div>
       </section>
 

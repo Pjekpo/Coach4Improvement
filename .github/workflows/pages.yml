@@ -33,8 +33,7 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Copy sitemap into build
-        run: cp sitemap.xml build/sitemap.xml
+      # Rely on Vite to copy static assets from /public (including sitemap.xml)
 
       - name: Create SPA fallback for deep links
         run: cp build/index.html build/404.html

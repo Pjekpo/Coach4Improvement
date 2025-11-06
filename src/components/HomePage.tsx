@@ -15,6 +15,8 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { motion } from "motion/react";
+import { Helmet } from "react-helmet-async";
+import { Link } from "react-router-dom";
 
 interface HomePageProps {
   onNavigate: (page: string) => void;
@@ -90,6 +92,55 @@ export function HomePage({ onNavigate, onOpenBooking }: HomePageProps) {
 
   return (
     <div className="min-h-screen">
+      <Helmet>
+        <link rel="canonical" href="https://coach4improvement.co.uk/" />
+        {/* TODO: Place og-home.jpg into /public. Update URL if different. */}
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Coach4Improvement | CQC Care Consultancy & Coaching" />
+        <meta property="og:description" content="Specialist CQC care consultancy and personal development coaching. Supporting care providers with compliance, audits, registration and mindset growth services." />
+        <meta property="og:url" content="https://coach4improvement.co.uk/" />
+        <meta property="og:image" content="https://coach4improvement.co.uk/og-home.jpg" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Coach4Improvement | CQC Care Consultancy & Coaching" />
+        <meta name="twitter:description" content="Specialist CQC care consultancy and personal development coaching. Supporting care providers with compliance, audits, registration and mindset growth services." />
+        <meta name="twitter:image" content="https://coach4improvement.co.uk/og-home.jpg" />
+        <script type="application/ld+json">
+          {JSON.stringify(
+            {
+              "@context": "https://schema.org",
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                {
+                  "@type": "ListItem",
+                  position: 1,
+                  name: "Home",
+                  item: "https://coach4improvement.co.uk/",
+                },
+              ],
+            },
+            null,
+            2
+          )}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify(
+            {
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              name: "Coach4Improvement Care Consultancy",
+              url: "https://coach4improvement.co.uk/",
+              logo: "https://coach4improvement.co.uk/og-image.png",
+              description:
+                "CQC care consultancy, mock inspections, audits, registration support and development coaching.",
+              sameAs: [
+                "https://www.linkedin.com/company/coach4improvement-care-consultancy-ltd/",
+              ],
+            },
+            null,
+            2
+          )}
+        </script>
+      </Helmet>
       {/* Hero Section */}
       <section
         className="relative bg-gradient-to-br from-primary via-primary to-secondary text-white overflow-hidden"
@@ -106,7 +157,7 @@ export function HomePage({ onNavigate, onOpenBooking }: HomePageProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <h1 className="text-white mb-4">Solution Focused Care Consultancy</h1>
+              <h1 className="text-white mb-4">CQC Care Consultancy & Coaching</h1>
               <div className="text-white/95 mb-8 space-y-4">
                 <p>
                   We deliver specialised <strong>Regulatory Care consultancy</strong> for all <strong>CQC-registered services</strong> across England and CIW- Wales, supporting both care homes and domiciliary care providers. What sets us apart is our dual foundation: a supportive <strong>Coaching approach</strong> and deep <strong>Social Work expertise</strong>, ensuring our support drives <strong>meaningful, sustained improvement</strong>, not just compliance.
@@ -159,6 +210,11 @@ export function HomePage({ onNavigate, onOpenBooking }: HomePageProps) {
                 <p className="text-sm text-white">{partner.name}</p>
               </motion.div>
             ))}
+          </div>
+          {/* Internal links for SEO */}
+          <div className="mt-8 flex gap-4">
+            <Link to="/services" className="underline text-white">Explore our CQC services</Link>
+            <Link to="/contact" className="underline text-white">Contact our consultants</Link>
           </div>
         </div>
       </section>

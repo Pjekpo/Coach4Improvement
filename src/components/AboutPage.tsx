@@ -48,6 +48,7 @@ export function AboutPage() {
         <title>About Us | Coach4Improvement Care Consultancy & Coaching</title>
         <meta name="description" content="With expertise in CQC regulatory support, compliance improvement and leadership coaching, Coach4Improvement helps care providers and professionals achieve high quality standards." />
         <meta name="keywords" content="quality improvement consultant CQC, regulatory guidance care services, personal development coach, health and social care compliance expert" />
+        <link rel="canonical" href="https://coach4improvement.co.uk/about" />
       </Helmet>
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-primary via-primary to-secondary text-white py-16">
