@@ -4,26 +4,41 @@
   import path from 'path';
   import fs from 'fs';
 
-  // Serve and bundle favicon without needing a public/ copy
+  // Serve and bundle favicon (ico + png sizes) without needing a public/ copy
   const faviconPlugin = () => ({
     name: 'favicon-plugin',
     configureServer(server) {
-      const src = path.resolve(__dirname, 'src/assets/favicon.ico');
-      server.middlewares.use('/favicon.ico', (req, res, next) => {
-        fs.readFile(src, (err, data) => {
-          if (err) return next();
-          res.setHeader('Content-Type', 'image/x-icon');
-          res.end(data);
+      const ico = path.resolve(__dirname, 'src/assets/favicon.ico');
+      const png16 = path.resolve(__dirname, 'src/assets/favicon-16x16.png');
+      const png32 = path.resolve(__dirname, 'src/assets/favicon-32x32.png');
+
+      const serve = (route: string, file: string, type: string) => {
+        server.middlewares.use(route, (req, res, next) => {
+          fs.readFile(file, (err, data) => {
+            if (err) return next();
+            res.setHeader('Content-Type', type);
+            res.end(data);
+          });
         });
-      });
+      };
+
+      serve('/favicon.ico', ico, 'image/x-icon');
+      serve('/favicon-16x16.png', png16, 'image/png');
+      serve('/favicon-32x32.png', png32, 'image/png');
     },
     generateBundle() {
-      const src = path.resolve(__dirname, 'src/assets/favicon.ico');
-      try {
-        const data = fs.readFileSync(src);
-        this.emitFile({ type: 'asset', fileName: 'favicon.ico', source: data });
-      } catch (_) {
-        // If the file is missing, skip silently
+      const files = [
+        { src: path.resolve(__dirname, 'src/assets/favicon.ico'), name: 'favicon.ico' },
+        { src: path.resolve(__dirname, 'src/assets/favicon-16x16.png'), name: 'favicon-16x16.png' },
+        { src: path.resolve(__dirname, 'src/assets/favicon-32x32.png'), name: 'favicon-32x32.png' },
+      ];
+      for (const f of files) {
+        try {
+          const data = fs.readFileSync(f.src);
+          this.emitFile({ type: 'asset', fileName: f.name, source: data });
+        } catch (_) {
+          // If a file is missing, skip silently
+        }
       }
     },
   });

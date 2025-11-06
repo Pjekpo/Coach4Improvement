@@ -23,9 +23,12 @@
       <meta name="twitter:description" content="Specialist CQC care consultancy and personal development coaching. Supporting care providers with compliance, audits, registration and mindset growth services." />
       <meta name="twitter:image" content="https://coach4improvement.co.uk/og-image.png" />
 
-      <!-- Favicon -->
-      <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-      <link rel="apple-touch-icon" href="https://coach4improvement.co.uk/og-image.png" />
+      <!-- Favicon (served from src/assets via Vite plugin) -->
+      <link rel="icon" href="/favicon.ico" sizes="any" />
+      <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+      <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+      <!-- TODO: Provide a 180x180 Apple touch icon in /src/assets or /public and update this path -->
+      <link rel="apple-touch-icon" href="/favicon-32x32.png" />
 
       <!-- Additional Open Graph metadata to help crawlers choose the image -->
       <meta property="og:site_name" content="Coach4Improvement" />
