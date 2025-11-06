@@ -4,7 +4,7 @@ import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { Menu, X, Phone, Mail } from "lucide-react";
 import { Button } from "./ui/button";
-import LogoImage from "../assets/Asset 1.png";
+import LogoImage from "../assets/asset-1.png"; // NOTE: ensure filename matches src/assets/asset-1.png
 
 interface HeaderProps {
   onOpenBooking: () => void;

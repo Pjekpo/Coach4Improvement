@@ -1,5 +1,5 @@
 import { Phone, Mail, MapPin, MessageCircle } from "lucide-react";
-import LogoImage from "../assets/Asset 1.png";
+import LogoImage from "../assets/asset-1.png"; // NOTE: ensure filename matches src/assets/asset-1.png
 
 export function Footer() {
   return (
