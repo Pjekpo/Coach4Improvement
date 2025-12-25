@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { Menu, X, Phone, Mail } from "lucide-react";
 import { Button } from "./ui/button";
@@ -13,6 +13,7 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const { user, signOut } = useAuth();
+  const isLoggedIn = Boolean(user);
 
   const avatar =
     (user?.user_metadata as any)?.avatar_url ||
@@ -33,6 +34,12 @@ export function Header() {
     `px-4 py-2 rounded-lg transition-colors ${
       isActive ? "bg-primary text-primary-foreground" : "hover:bg-accent hover:text-accent-foreground"
     }`;
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      setAuthOpen(false);
+    }
+  }, [isLoggedIn]);
 
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm">
@@ -79,17 +86,17 @@ export function Header() {
           <div className="hidden lg:flex items-center gap-2">
             <Button
               onClick={async () => {
-                if (user) {
+                if (isLoggedIn) {
                   await signOut();
                   return;
                 }
                 setAuthOpen(true);
               }}
               size="lg"
-              variant={user ? "destructive" : "outline"}
-              className={`flex items-center gap-2 ${user ? "bg-red-600 text-white border-red-700 hover:bg-red-700" : ""}`}
+              variant={isLoggedIn ? "destructive" : "outline"}
+              className={`flex items-center gap-2 ${isLoggedIn ? "bg-red-600 text-white border-red-700 hover:bg-red-700" : ""}`}
             >
-              <span className="text-sm font-medium">{user ? "Log Out" : "Sign Up"}</span>
+              <span className="text-sm font-medium">{isLoggedIn ? "Log Out" : "Sign Up"}</span>
             </Button>
           </div>
 
@@ -122,17 +129,17 @@ export function Header() {
             <Button
               onClick={() => {
                 setMobileMenuOpen(false);
-                if (user) {
+                if (isLoggedIn) {
                   signOut();
                   return;
                 }
                 setAuthOpen(true);
               }}
-              className={`w-full mt-4 flex items-center gap-2 ${user ? "bg-red-600 text-white hover:bg-red-700" : ""}`}
+              className={`w-full mt-4 flex items-center gap-2 ${isLoggedIn ? "bg-red-600 text-white hover:bg-red-700" : ""}`}
               size="lg"
-              variant={user ? "destructive" : "outline"}
+              variant={isLoggedIn ? "destructive" : "outline"}
             >
-              <span className="text-base font-medium">{user ? "Log Out" : "Sign Up"}</span>
+              <span className="text-base font-medium">{isLoggedIn ? "Log Out" : "Sign Up"}</span>
             </Button>
           </nav>
         )}

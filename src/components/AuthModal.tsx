@@ -1,10 +1,9 @@
 import { useState } from 'react';
-import { Mail, Lock, Chrome, BadgeCheck, BookOpen } from 'lucide-react';
+import { Mail, Lock, Chrome } from 'lucide-react';
 import { useAuth } from '@/auth/AuthProvider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner@2.0.3';
-import LogoImage from '@/assets/asset-1.png';
 
 type Props = {
   open: boolean;
@@ -81,26 +80,11 @@ export default function AuthModal({ open, onClose, defaultTab = 'signup' }: Prop
         </div>
         <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 border border-orange-50">
           <div className="flex justify-between items-start mb-6">
-            <div className="flex items-center gap-3">
-              <img
-                src={LogoImage}
-                alt="Coach4Improvement"
-                className="h-12 w-12 object-contain"
-                loading="eager"
-                decoding="async"
-              />
-              <div className="space-y-1">
-                <h3 className="text-xl font-black text-slate-900 leading-tight">Care Plan Quality Audit</h3>
-                <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
-                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-emerald-700">
-                    <BadgeCheck className="h-4 w-4" /> CQC Quality
-                  </span>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-1 text-indigo-700">
-                    <BookOpen className="h-4 w-4" /> Clinical Standards
-                  </span>
-                </div>
-                <p className="text-sm text-gray-500">{subtitle}</p>
-              </div>
+            <div className="space-y-1">
+              <h3 className="text-xl font-black text-slate-900 leading-tight">
+                {tab === 'signup' ? 'Create your account' : 'Welcome back'}
+              </h3>
+              <p className="text-sm text-gray-500">{subtitle}</p>
             </div>
             <button
               onClick={onClose}
