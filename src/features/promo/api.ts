@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseConfigured } from '@/lib/supabase';
 
 const DAYS = 30;
 const BASE32 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
@@ -25,6 +25,9 @@ export type PromoRow = {
 
 // Idempotently create or return the user's current non-expired, unredeemed code
 export async function issuePromoCode(): Promise<PromoRow> {
+  if (!supabaseConfigured || !supabase) {
+    throw new Error('Supabase is not configured.');
+  }
   const { data: sess } = await supabase.auth.getSession();
   const uid = sess.session?.user?.id;
   if (!uid) throw new Error('Not authenticated');
@@ -57,4 +60,3 @@ export async function issuePromoCode(): Promise<PromoRow> {
   }
   throw new Error('Could not generate unique promo code');
 }
-

@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner@2.0.3';
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseConfigured } from '@/lib/supabase';
 
 export default function AuthCallback() {
   const navigate = useNavigate();
@@ -12,6 +12,12 @@ export default function AuthCallback() {
       const code = params.get('code');
       if (!code) {
         toast.error('No auth code found. Please try signing in again.');
+        navigate('/');
+        return;
+      }
+
+      if (!supabaseConfigured || !supabase) {
+        toast.error('Sign-in unavailable: Supabase is not configured.');
         navigate('/');
         return;
       }

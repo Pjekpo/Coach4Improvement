@@ -3,7 +3,7 @@ import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 import { z } from 'zod';
 import BookingGate from '@/features/booking/BookingGate';
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseConfigured } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -36,6 +36,7 @@ export default function BookingPage() {
   const [activeCode, setActiveCode] = useState<string | null>(null);
   const [unavailableDates, setUnavailableDates] = useState<Set<string>>(new Set());
   const [bookedSlots, setBookedSlots] = useState<SlotMap>({});
+  const supabaseReady = supabaseConfigured && !!supabase;
 
   const dateKey = (d: Date) => d.toISOString().split('T')[0];
 
@@ -76,8 +77,10 @@ export default function BookingPage() {
   };
 
   useEffect(() => {
+    if (!supabaseReady || !supabase) return;
+    const client = supabase;
     (async () => {
-      const { data, error } = await supabase
+      const { data, error } = await client
         .from('promo_codes')
         .select('*')
         .is('redeemed_at', null)
@@ -85,11 +88,13 @@ export default function BookingPage() {
         .maybeSingle();
       if (!error && (data as any)?.code) setActiveCode((data as any).code as string);
     })();
-  }, [user?.id]);
+  }, [user?.id, supabaseReady]);
 
   useEffect(() => {
+    if (!supabaseReady || !supabase) return;
+    const client = supabase;
     (async () => {
-      const { data, error } = await supabase
+      const { data, error } = await client
         .from('bookings')
         .select('date,time_slot')
         .not('date', 'is', null);
@@ -108,7 +113,7 @@ export default function BookingPage() {
         setUnavailableDates(new Set(fully));
       }
     })();
-  }, []);
+  }, [supabaseReady]);
 
   useEffect(() => {
     // Reset time slot when date changes so we don't keep an unavailable slot
@@ -166,6 +171,10 @@ export default function BookingPage() {
       .join('\n');
 
     if (activeCode) {
+      if (!supabaseReady || !supabase) {
+        toast.error('Booking system is unavailable. Please try again later.');
+        return;
+      }
       await supabase
         .from('promo_codes')
         .update({ redeemed_at: new Date().toISOString() })
@@ -180,6 +189,11 @@ export default function BookingPage() {
       notes: combinedNotes || null,
       user_id: user?.id ?? null,
     };
+    if (!supabaseReady || !supabase) {
+      toast.error('Booking system is unavailable. Please try again later.');
+      return;
+    }
+
     const { error } = await supabase.from('bookings').insert([bookingPayload]);
     if (error) {
       toast.error('Unable to save your booking. Please try again.');
