@@ -173,16 +173,6 @@ export function ContactPage() {
         </div>
       </section>
 
-      {/* SEO: Internal links */}
-      <section className="py-8">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>
-            Prefer to browse first? Explore our <Link className="underline" to="/services">CQC services</Link> or
-            {' '}see <Link className="underline" to="/packages">packages and pricing</Link>.
-          </p>
-        </div>
-      </section>
-
       {/* Contact Information Cards */}
       <section className="py-16 bg-accent">
         <div className="container mx-auto px-4">

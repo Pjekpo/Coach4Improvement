@@ -19,10 +19,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const redirectTo =
-    import.meta.env.VITE_SUPABASE_REDIRECT_URL ??
-    (typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : undefined);
-
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -44,6 +40,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signInWithGoogle = useCallback(async () => {
+    const redirectTo =
+      import.meta.env.VITE_SUPABASE_REDIRECT_URL ??
+      (typeof window !== 'undefined'
+        ? window.location.hostname === 'localhost'
+          ? 'http://localhost:5173/auth/callback'
+          : 'https://coach4improvement.co.uk/auth/callback'
+        : undefined);
+
     if (!supabaseConfigured) {
       throw new Error('Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.');
     }
@@ -51,7 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       provider: 'google',
       options: {
         redirectTo,
-        scopes: 'https://www.googleapis.com/auth/calendar.events',
+        scopes: 'openid email profile https://www.googleapis.com/auth/calendar.events',
       },
     });
     if (error) throw error;

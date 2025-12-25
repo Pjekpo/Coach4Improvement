@@ -208,15 +208,6 @@ export function PackagesPage({ onOpenBooking }: PackagesPageProps) {
       </section>
 
       {/* SEO: Internal links */}
-      <section className="py-8">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>
-            Need more details on what’s included? Review our <Link className="underline" to="/services">CQC services</Link> or
-            {' '}<Link className="underline" to="/contact">talk to a consultant</Link>.
-          </p>
-        </div>
-      </section>
-
       {/* Pricing Toggle */}
       <section className="py-12">
         <div className="container mx-auto px-4">

@@ -194,15 +194,6 @@ export function ServicesPage({ onOpenBooking }: ServicesPageProps) {
       </section>
 
       {/* SEO: Internal links below hero */}
-      <section className="py-8">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>
-            Looking for pricing? See our <Link className="underline" to="/packages">consultancy packages</Link> or
-            {' '}<Link className="underline" to="/contact">contact our team</Link> for a custom quote.
-          </p>
-        </div>
-      </section>
-
       {/* Services Grid */}
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4">
