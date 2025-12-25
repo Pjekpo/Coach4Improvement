@@ -40,13 +40,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signInWithGoogle = useCallback(async () => {
-    const redirectTo =
-      import.meta.env.VITE_SUPABASE_REDIRECT_URL ??
-      (typeof window !== 'undefined'
-        ? window.location.hostname === 'localhost'
-          ? 'http://localhost:5173/auth/callback'
-          : 'https://coach4improvement.co.uk/auth/callback'
-        : undefined);
+const redirectTo =
+  window.location.hostname === "localhost"
+    ? "http://localhost:5173/auth/callback"
+    : "https://coach4improvement.co.uk/auth/callback";
+
+await supabase.auth.signInWithOAuth({
+  provider: "google",
+  options: {
+    redirectTo,
+    scopes: "openid email profile https://www.googleapis.com/auth/calendar.events",
+  },
+});
 
     if (!supabaseConfigured) {
       throw new Error('Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.');
