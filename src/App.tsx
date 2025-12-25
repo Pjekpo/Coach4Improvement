@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
+import { AuthProvider } from "./auth/AuthProvider";
+import PromoModal from "./components/PromoModal";
+import BookingPage from "./pages/BookingPage";
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
 import { HomePage } from "./components/HomePage";
@@ -10,11 +13,12 @@ import { AboutPage } from "./components/AboutPage";
 import { ServicesPage } from "./components/ServicesPage";
 import { PackagesPage } from "./components/PackagesPage";
 import { ContactPage } from "./components/ContactPage";
+import ResourcesPage from "./components/ResourcesPage";
 import { BookingModal } from "./components/BookingModal";
 import { Toaster } from "./components/ui/sonner";
+import AuthCallback from "./pages/AuthCallback";
 
 function RoutedApp() {
-  const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleNavigate = (page: string) => {
@@ -24,6 +28,7 @@ function RoutedApp() {
       about: "/about",
       services: "/services",
       packages: "/packages",
+      resources: "/resources",
       contact: "/contact",
     };
     navigate(map[page] ?? "/");
@@ -34,18 +39,20 @@ function RoutedApp() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header onOpenBooking={() => setBookingModalOpen(true)} />
+      <Header />
       <main className="flex-1">
         <Routes>
-          <Route path="/" element={<HomePage onNavigate={handleNavigate} onOpenBooking={() => setBookingModalOpen(true)} />} />
+          <Route path="/" element={<HomePage onNavigate={handleNavigate} onOpenBooking={() => navigate('/booking')} />} />
           <Route path="/about" element={<AboutPage />} />
-          <Route path="/services" element={<ServicesPage onOpenBooking={() => setBookingModalOpen(true)} />} />
-          <Route path="/packages" element={<PackagesPage onOpenBooking={() => setBookingModalOpen(true)} />} />
+          <Route path="/services" element={<ServicesPage onOpenBooking={() => navigate('/booking')} />} />
+          <Route path="/packages" element={<PackagesPage onOpenBooking={() => navigate('/booking')} />} />
+          <Route path="/resources" element={<ResourcesPage />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/booking" element={<BookingPage />} />
         </Routes>
       </main>
       <Footer />
-      <BookingModal open={bookingModalOpen} onClose={() => setBookingModalOpen(false)} />
       <Toaster />
     </div>
   );
@@ -54,9 +61,12 @@ function RoutedApp() {
 export default function App() {
   return (
     <HelmetProvider>
-      <BrowserRouter>
-        <RoutedApp />
-      </BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter>
+          <RoutedApp />
+          <PromoModal />
+        </BrowserRouter>
+      </AuthProvider>
     </HelmetProvider>
   );
 }

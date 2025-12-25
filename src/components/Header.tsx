@@ -5,19 +5,27 @@ import { NavLink } from "react-router-dom";
 import { Menu, X, Phone, Mail } from "lucide-react";
 import { Button } from "./ui/button";
 import LogoImage from "../assets/asset-1.png"; // NOTE: ensure filename matches src/assets/asset-1.png
+import ProfileImage from "../assets/Profile.jpg";
+import { useAuth } from "@/auth/AuthProvider";
+import AuthModal from "@/components/AuthModal";
 
-interface HeaderProps {
-  onOpenBooking: () => void;
-}
-
-export function Header({ onOpenBooking }: HeaderProps) {
+export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
+  const { user, signOut } = useAuth();
+
+  const avatar =
+    (user?.user_metadata as any)?.avatar_url ||
+    (user?.user_metadata as any)?.picture ||
+    (user?.user_metadata as any)?.avatar;
+  const displayAvatar = avatar || ProfileImage;
 
   const navLinks = [
     { name: "Home", to: "/" },
     { name: "About Us", to: "/about" },
     { name: "Services", to: "/services" },
     { name: "Packages", to: "/packages" },
+    { name: "Resources", to: "/resources" },
     { name: "Contact", to: "/contact" },
   ];
 
@@ -68,9 +76,20 @@ export function Header({ onOpenBooking }: HeaderProps) {
             ))}
           </nav>
 
-          <div className="hidden lg:block">
-            <Button onClick={onOpenBooking} size="lg">
-              Book Consultation
+          <div className="hidden lg:flex items-center gap-2">
+            <Button
+              onClick={async () => {
+                if (user) {
+                  await signOut();
+                  return;
+                }
+                setAuthOpen(true);
+              }}
+              size="lg"
+              variant={user ? "destructive" : "outline"}
+              className={`flex items-center gap-2 ${user ? "bg-red-600 text-white border-red-700 hover:bg-red-700" : ""}`}
+            >
+              <span className="text-sm font-medium">{user ? "Log Out" : "Sign Up"}</span>
             </Button>
           </div>
 
@@ -103,16 +122,23 @@ export function Header({ onOpenBooking }: HeaderProps) {
             <Button
               onClick={() => {
                 setMobileMenuOpen(false);
-                onOpenBooking();
+                if (user) {
+                  signOut();
+                  return;
+                }
+                setAuthOpen(true);
               }}
-              className="w-full mt-4"
+              className={`w-full mt-4 flex items-center gap-2 ${user ? "bg-red-600 text-white hover:bg-red-700" : ""}`}
               size="lg"
+              variant={user ? "destructive" : "outline"}
             >
-              Book Consultation
+              <span className="text-base font-medium">{user ? "Log Out" : "Sign Up"}</span>
             </Button>
           </nav>
         )}
       </div>
+
+      <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} defaultTab="signup" />
     </header>
   );
 }

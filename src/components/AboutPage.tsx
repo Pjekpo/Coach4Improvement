@@ -1,8 +1,12 @@
-import { ImageWithFallback } from "./media/ImageWithFallback";
 import { Card, CardContent } from "./ui/card";
 import { Award, Heart, Users, Target, Shield, TrendingUp } from "lucide-react";
 import { motion } from "motion/react";
 import { Helmet } from "react-helmet-async";
+import About1 from "@/assets/aboutphotos/123.jpeg";
+import About2 from "@/assets/aboutphotos/aaks.jpeg";
+import About3 from "@/assets/aboutphotos/hdvu.jpeg";
+import About4 from "@/assets/aboutphotos/WhatsApp Image 2025-12-19 at 20.27.24.jpeg";
+// Collage photos (remaining available)
 
 const values = [
   {
@@ -103,12 +107,19 @@ export function AboutPage() {
               viewport={{ once: true }}
               className="relative"
             >
-              <div className="rounded-2xl overflow-hidden shadow-xl">
-                <ImageWithFallback
-                  src="https://images.unsplash.com/photo-1565647946321-a146ac24a220?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxoZWFsdGhjYXJlJTIwdGVhbSUyMG9mZmljZXxlbnwxfHx8fDE3NjAyNjI5NjR8MA&ixlib=rb-4.1.0&q=80&w=1080"
-                  alt="C4i team collaborating"
-                  className="w-full h-auto"
-                />
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 auto-rows-[180px] md:auto-rows-[220px]">
+                <div className="relative rounded-2xl shadow-xl border border-slate-100 bg-white overflow-hidden md:col-span-2 md:row-span-2">
+                  <img src={About2} alt="Coach4Improvement collage 2" className="w-full h-full object-cover" loading="lazy" />
+                </div>
+                <div className="relative rounded-2xl shadow-xl border border-slate-100 bg-white overflow-hidden md:col-span-2">
+                  <img src={About1} alt="Coach4Improvement collage 1" className="w-full h-full object-cover" loading="lazy" />
+                </div>
+                <div className="relative rounded-2xl shadow-xl border border-slate-100 bg-white overflow-hidden">
+                  <img src={About3} alt="Coach4Improvement collage 3" className="w-full h-full object-cover" loading="lazy" />
+                </div>
+                <div className="relative rounded-2xl shadow-xl border border-slate-100 bg-white overflow-hidden md:col-span-3">
+                  <img src={About4} alt="Coach4Improvement collage 4" className="w-full h-full object-cover" loading="lazy" />
+                </div>
               </div>
             </motion.div>
           </div>
