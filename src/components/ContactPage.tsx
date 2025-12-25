@@ -12,6 +12,8 @@ import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { toast } from "sonner@2.0.3";
 
+type FormStatus = "idle" | "sending" | "sent" | "error";
+
 const contactInfo = [
   {
     icon: Phone,
@@ -43,18 +45,42 @@ export function ContactPage() {
     phone: "",
     message: "",
   });
+  const [status, setStatus] = useState<FormStatus>("idle");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Mock form submission
-    toast.success("Message sent successfully! We'll get back to you within 24 hours.");
-    setFormData({
-      name: "",
-      email: "",
-      organisation: "",
-      phone: "",
-      message: "",
-    });
+    setStatus("sending");
+
+    const form = e.currentTarget;
+    const data = new FormData(form);
+
+    try {
+      const res = await fetch("https://formspree.io/f/xykgrvae", {
+        method: "POST",
+        body: data,
+        headers: {
+          Accept: "application/json",
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error("Form submission failed");
+      }
+
+      form.reset();
+      setFormData({
+        name: "",
+        email: "",
+        organisation: "",
+        phone: "",
+        message: "",
+      });
+      setStatus("sent");
+      toast.success("Message sent successfully! We'll get back to you within 24 hours.");
+    } catch {
+      setStatus("error");
+      toast.error("Sorry, something went wrong. Please try again.");
+    }
   };
 
   // Prefer iMessage/SMS on iOS when tapping the primary contact action
@@ -208,7 +234,21 @@ export function ContactPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <form onSubmit={handleSubmit} className="space-y-6">
+                  <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+                    {/* Honeypot field: bots will fill this, humans won't */}
+                    <input
+                      type="text"
+                      name="_gotcha"
+                      style={{ display: "none" }}
+                      tabIndex={-1}
+                      autoComplete="off"
+                    />
+                    {/* Email subject */}
+                    <input
+                      type="hidden"
+                      name="_subject"
+                      value="New Coach4Improvement website enquiry"
+                    />
                     <div className="space-y-2">
                       <Label htmlFor="name">Full Name *</Label>
                       <Input
@@ -270,10 +310,22 @@ export function ContactPage() {
                       />
                     </div>
 
-                    <Button type="submit" size="lg" className="w-full">
+                    <Button type="submit" size="lg" className="w-full" disabled={status === "sending"}>
                       <Send className="w-4 h-4 mr-2" />
-                      Send Message
+                      {status === "sending" ? "Sending..." : "Send Message"}
                     </Button>
+
+                    {status === "sent" && (
+                      <p className="text-sm text-emerald-700 text-center">
+                        Thank you. Your message has been sent.
+                      </p>
+                    )}
+
+                    {status === "error" && (
+                      <p className="text-sm text-red-600 text-center">
+                        Sorry, something went wrong. Please try again.
+                      </p>
+                    )}
 
                     <p className="text-xs text-muted-foreground text-center">
                       By submitting this form, you agree to our privacy policy. Your data is protected and will only be used to respond to your inquiry.
