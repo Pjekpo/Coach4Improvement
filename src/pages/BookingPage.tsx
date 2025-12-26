@@ -33,7 +33,6 @@ export default function BookingPage() {
   const [serviceNeed, setServiceNeed] = useState('');
   const [notes, setNotes] = useState('');
   const { user, session } = useAuth();
-  const [activeCode, setActiveCode] = useState<string | null>(null);
   const [unavailableDates, setUnavailableDates] = useState<Set<string>>(new Set());
   const [bookedSlots, setBookedSlots] = useState<SlotMap>({});
   const supabaseReady = supabaseConfigured && !!supabase;
@@ -75,20 +74,6 @@ export default function BookingPage() {
     if (slots.has('ALL')) return true;
     return timeSlots.every((slot) => slots.has(slot));
   };
-
-  useEffect(() => {
-    if (!supabaseReady || !supabase) return;
-    const client = supabase;
-    (async () => {
-      const { data, error } = await client
-        .from('promo_codes')
-        .select('*')
-        .is('redeemed_at', null)
-        .gt('expires_at', new Date().toISOString())
-        .maybeSingle();
-      if (!error && (data as any)?.code) setActiveCode((data as any).code as string);
-    })();
-  }, [user?.id, supabaseReady]);
 
   useEffect(() => {
     if (!supabaseReady || !supabase) return;
@@ -169,17 +154,6 @@ export default function BookingPage() {
     ]
       .filter(Boolean)
       .join('\n');
-
-    if (activeCode) {
-      if (!supabaseReady || !supabase) {
-        toast.error('Booking system is unavailable. Please try again later.');
-        return;
-      }
-      await supabase
-        .from('promo_codes')
-        .update({ redeemed_at: new Date().toISOString() })
-        .is('redeemed_at', null);
-    }
 
     const bookingPayload = {
       date: parsedDate.toISOString(),
@@ -353,12 +327,6 @@ export default function BookingPage() {
                 />
               </div>
             </div>
-
-            {activeCode && (
-              <div className="rounded-md border border-emerald-300 bg-emerald-50 p-3 text-center text-sm">
-                20% off applied automatically at checkout (code {activeCode})
-              </div>
-            )}
 
             <div className="flex justify-center">
               <Button

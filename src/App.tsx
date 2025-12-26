@@ -4,7 +4,6 @@ import { useState } from "react";
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "./auth/AuthProvider";
-import PromoModal from "./components/PromoModal";
 import BookingPage from "./pages/BookingPage";
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
@@ -64,7 +63,6 @@ export default function App() {
       <AuthProvider>
         <BrowserRouter>
           <RoutedApp />
-          <PromoModal />
         </BrowserRouter>
       </AuthProvider>
     </HelmetProvider>
