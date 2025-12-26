@@ -173,39 +173,6 @@ export function ContactPage() {
         </div>
       </section>
 
-      {/* Contact Information Cards */}
-      <section className="py-16 bg-accent">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {contactInfo.map((info, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <Card className="h-full">
-                  <CardHeader>
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
-                      <info.icon className="w-6 h-6 text-primary" />
-                    </div>
-                    <CardTitle className="text-lg">{info.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {info.details.map((detail, idx) => (
-                      <p key={idx} className="text-sm text-muted-foreground mb-1">
-                        {detail}
-                      </p>
-                    ))}
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Contact Form and Map Section */}
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4">
