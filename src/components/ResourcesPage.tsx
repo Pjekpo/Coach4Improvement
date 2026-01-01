@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import {
   AlertTriangle,
@@ -41,6 +41,7 @@ import {
 import LogoImage from "@/assets/asset-1.png";
 import { supabase, supabaseConfigured } from "@/lib/supabase";
 import { useAuth } from "@/auth/AuthProvider";
+import AuthModal from "@/components/AuthModal";
 
 type AuditScore = "yes" | "no" | "na";
 type AccessState = "checking" | "signed-out" | "allowed" | "denied" | "error";
@@ -505,10 +506,8 @@ export function ResourcesPage() {
   const [openGuidance, setOpenGuidance] = useState<Record<string, boolean>>({});
   const [accessState, setAccessState] = useState<AccessState>("checking");
   const [accessMessage, setAccessMessage] = useState<string | null>(null);
-  const [emailInput, setEmailInput] = useState("");
-  const [passwordInput, setPasswordInput] = useState("");
-  const [signingIn, setSigningIn] = useState(false);
-  const { user, signInWithEmail, signInWithGoogle, signOut } = useAuth();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const { user, signOut } = useAuth();
   const exportBaseColor = "#4F46E5";
   const exportHoverColor = "#4338ca";
   const clearBaseColor = "#303a4b";
@@ -598,32 +597,11 @@ export function ResourcesPage() {
     };
   }, [user]);
 
-  const handleEmailSignIn = async (event: FormEvent) => {
-    event.preventDefault();
-    setAccessMessage(null);
-    setSigningIn(true);
-    try {
-      await signInWithEmail(emailInput.trim(), passwordInput);
-    } catch (error) {
-      const msg = error instanceof Error ? error.message : "Sign-in failed.";
-      setAccessMessage(msg);
-    } finally {
-      setSigningIn(false);
+  useEffect(() => {
+    if (accessState === "allowed") {
+      setAuthModalOpen(false);
     }
-  };
-
-  const handleGoogleSignIn = async () => {
-    setAccessMessage(null);
-    setSigningIn(true);
-    try {
-      await signInWithGoogle();
-    } catch (error) {
-      const msg = error instanceof Error ? error.message : "Unable to start Google sign-in.";
-      setAccessMessage(msg);
-    } finally {
-      setSigningIn(false);
-    }
-  };
+  }, [accessState]);
 
   const stats = useMemo(() => {
     let met = 0;
@@ -656,11 +634,99 @@ export function ResourcesPage() {
         <link rel="canonical" href="https://coach4improvement.co.uk/resources" />
       </Helmet>
       <div className="relative max-w-6xl mx-auto p-4 md:py-12">
+        {accessState !== "allowed" && (
+          <div
+            style={{
+              backgroundColor: "#0f172a",
+              borderRadius: "20px",
+              padding: "20px",
+              marginBottom: "24px",
+              boxShadow: "0 18px 40px rgba(15, 23, 42, 0.25)",
+            }}
+          >
+            <div style={{ textAlign: "center", color: "#f8fafc" }}>
+              <div style={{ fontSize: "22px", fontWeight: 800, letterSpacing: "0.02em" }}>Access required</div>
+              <div style={{ fontSize: "14px", color: "#cbd5f5", marginTop: "6px" }}>
+                Sign up or sign in with an approved email to continue.
+              </div>
+            </div>
+
+            {accessState === "checking" && (
+              <div style={{ color: "#cbd5f5", fontSize: "14px", marginTop: "12px", textAlign: "center" }}>
+                Checking access...
+              </div>
+            )}
+
+            {accessState === "error" && (
+              <div style={{ color: "#fca5a5", fontSize: "14px", marginTop: "12px", textAlign: "center" }}>
+                {accessMessage ?? "Access verification failed."}
+              </div>
+            )}
+
+            {accessState === "signed-out" && (
+              <div style={{ display: "flex", justifyContent: "center", marginTop: "16px" }}>
+                <button
+                  type="button"
+                  onClick={() => setAuthModalOpen(true)}
+                  style={{
+                    backgroundColor: "#4f46e5",
+                    color: "#ffffff",
+                    borderRadius: "999px",
+                    padding: "12px 20px",
+                    fontSize: "12px",
+                    fontWeight: 700,
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                    border: "1px solid rgba(255, 255, 255, 0.12)",
+                    cursor: "pointer",
+                  }}
+                >
+                  Sign in or create account
+                </button>
+              </div>
+            )}
+
+            {accessState === "denied" && (
+              <div style={{ display: "grid", gap: "10px", marginTop: "16px", textAlign: "center" }}>
+                <div style={{ color: "#fca5a5", fontSize: "14px", fontWeight: 700 }}>Access denied.</div>
+                <div style={{ color: "#cbd5f5", fontSize: "13px" }}>
+                  Your account does not have permission to view this page. Contact support to request access.
+                </div>
+                {user?.email && (
+                  <div style={{ color: "#cbd5f5", fontSize: "12px" }}>Signed in as {user.email}</div>
+                )}
+                <button
+                  type="button"
+                  onClick={signOut}
+                  style={{
+                    backgroundColor: "#0b1324",
+                    color: "#ffffff",
+                    borderRadius: "999px",
+                    padding: "10px 18px",
+                    fontSize: "12px",
+                    fontWeight: 700,
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                    border: "1px solid rgba(255, 255, 255, 0.12)",
+                    cursor: "pointer",
+                    justifySelf: "center",
+                  }}
+                >
+                  Sign Out
+                </button>
+              </div>
+            )}
+
+            <div style={{ marginTop: "12px", textAlign: "center", color: "#cbd5f5", fontSize: "12px" }}>
+              Need access? Email <strong>coach4improvement@gmail.com</strong> to be added.
+            </div>
+            <AuthModal open={authModalOpen} onClose={() => setAuthModalOpen(false)} defaultTab="login" />
+          </div>
+        )}
         <div
           style={{
             filter: accessState === "allowed" ? "none" : "blur(6px)",
             pointerEvents: accessState === "allowed" ? "auto" : "none",
-            transition: "filter 0.2s ease",
           }}
         >
           <div
@@ -1298,166 +1364,6 @@ export function ResourcesPage() {
             </div>
           </section>
         </div>
-        {accessState !== "allowed" && (
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "24px",
-              backgroundColor: "rgba(15, 23, 42, 0.55)",
-              zIndex: 5,
-            }}
-          >
-            <div
-              style={{
-                width: "min(520px, 100%)",
-                backgroundColor: "#ffffff",
-                borderRadius: "18px",
-                padding: "24px",
-                border: "1px solid #e2e8f0",
-                boxShadow: "0 24px 60px rgba(15, 23, 42, 0.25)",
-              }}
-            >
-              <h2 style={{ margin: 0, fontSize: "20px", fontWeight: 800, color: "#0f172a" }}>
-                Resource Access
-              </h2>
-              <p style={{ margin: "6px 0 16px", color: "#475569" }}>
-                Sign in to view the resources audit toolkit.
-              </p>
-
-              {accessState === "checking" && (
-                <div style={{ color: "#475569", fontSize: "14px" }}>Checking access...</div>
-              )}
-
-              {accessState === "error" && (
-                <div style={{ color: "#b91c1c", fontSize: "14px" }}>
-                  {accessMessage ?? "Access verification failed."}
-                </div>
-              )}
-
-              {accessState === "signed-out" && (
-                <form onSubmit={handleEmailSignIn} style={{ display: "grid", gap: "12px" }}>
-                  <div style={{ display: "grid", gap: "6px" }}>
-                    <label style={{ fontSize: "12px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#64748b" }}>
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      required
-                      value={emailInput}
-                      onChange={(event) => setEmailInput(event.target.value)}
-                      style={{
-                        borderRadius: "12px",
-                        border: "1px solid #e2e8f0",
-                        padding: "12px 14px",
-                        fontSize: "14px",
-                        fontWeight: 600,
-                        color: "#0f172a",
-                        backgroundColor: "#ffffff",
-                      }}
-                    />
-                  </div>
-                  <div style={{ display: "grid", gap: "6px" }}>
-                    <label style={{ fontSize: "12px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#64748b" }}>
-                      Password
-                    </label>
-                    <input
-                      type="password"
-                      required
-                      value={passwordInput}
-                      onChange={(event) => setPasswordInput(event.target.value)}
-                      style={{
-                        borderRadius: "12px",
-                        border: "1px solid #e2e8f0",
-                        padding: "12px 14px",
-                        fontSize: "14px",
-                        fontWeight: 600,
-                        color: "#0f172a",
-                        backgroundColor: "#ffffff",
-                      }}
-                    />
-                  </div>
-                  {accessMessage && (
-                    <div style={{ color: "#b91c1c", fontSize: "13px" }}>{accessMessage}</div>
-                  )}
-                  <button
-                    type="submit"
-                    disabled={signingIn}
-                    style={{
-                      backgroundColor: "#0f172a",
-                      color: "#ffffff",
-                      borderRadius: "999px",
-                      padding: "10px 18px",
-                      fontSize: "12px",
-                      fontWeight: 700,
-                      letterSpacing: "0.08em",
-                      textTransform: "uppercase",
-                      border: "none",
-                      cursor: signingIn ? "not-allowed" : "pointer",
-                    }}
-                  >
-                    {signingIn ? "Signing in..." : "Sign In"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleGoogleSignIn}
-                    disabled={signingIn}
-                    style={{
-                      backgroundColor: "#f8fafc",
-                      color: "#0f172a",
-                      borderRadius: "999px",
-                      padding: "10px 18px",
-                      fontSize: "12px",
-                      fontWeight: 700,
-                      letterSpacing: "0.08em",
-                      textTransform: "uppercase",
-                      border: "1px solid #e2e8f0",
-                      cursor: signingIn ? "not-allowed" : "pointer",
-                    }}
-                  >
-                    Continue with Google
-                  </button>
-                </form>
-              )}
-
-              {accessState === "denied" && (
-                <div style={{ display: "grid", gap: "10px" }}>
-                  <div style={{ color: "#b91c1c", fontSize: "14px", fontWeight: 700 }}>
-                    Access denied.
-                  </div>
-                  <div style={{ color: "#475569", fontSize: "13px" }}>
-                    Your account does not have permission to view this page. Contact support to request access.
-                  </div>
-                  {user?.email && (
-                    <div style={{ color: "#64748b", fontSize: "12px" }}>Signed in as {user.email}</div>
-                  )}
-                  <button
-                    type="button"
-                    onClick={signOut}
-                    style={{
-                      backgroundColor: "#0f172a",
-                      color: "#ffffff",
-                      borderRadius: "999px",
-                      padding: "10px 18px",
-                      fontSize: "12px",
-                      fontWeight: 700,
-                      letterSpacing: "0.08em",
-                      textTransform: "uppercase",
-                      border: "none",
-                      cursor: "pointer",
-                      justifySelf: "start",
-                    }}
-                  >
-                    Sign Out
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   </div>

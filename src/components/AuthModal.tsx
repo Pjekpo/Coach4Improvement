@@ -1,17 +1,23 @@
 import { useState } from 'react';
 import { Mail, Lock, Chrome } from 'lucide-react';
 import { useAuth } from '@/auth/AuthProvider';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { toast } from 'sonner@2.0.3';
 
 type Props = {
   open: boolean;
   onClose: () => void;
   defaultTab?: 'login' | 'signup';
+  embedded?: boolean;
+  showClose?: boolean;
 };
 
-export default function AuthModal({ open, onClose, defaultTab = 'signup' }: Props) {
+export default function AuthModal({
+  open,
+  onClose,
+  defaultTab = 'signup',
+  embedded = false,
+  showClose = true,
+}: Props) {
   const { signInWithGoogle, signInWithEmail, signUpWithEmail, user } = useAuth();
   const [tab, setTab] = useState<'login' | 'signup'>(defaultTab);
   const [email, setEmail] = useState('');
@@ -68,133 +74,346 @@ export default function AuthModal({ open, onClose, defaultTab = 'signup' }: Prop
   };
 
   const emailNotVerified = !!user && !user.email_confirmed_at;
-  const title = tab === 'signup' ? 'Lets Start Learning' : 'Welcome back';
   const subtitle = tab === 'signup' ? 'Create your account to continue' : 'Sign in to continue';
+  const embeddedSubtitle =
+    tab === 'signup'
+      ? 'Create your account with an approved email to continue.'
+      : 'Sign in with your approved email to continue.';
   const cta = tab === 'signup' ? 'Sign Up' : 'Log In';
 
-  return (
-    <div className="fixed inset-0 z-[100] bg-black/50 flex items-center justify-center px-3">
-      <div className="relative w-full max-w-md sm:max-w-lg">
-        <div className="absolute -left-10 -bottom-10 hidden sm:block opacity-80 select-none">
-          <div className="h-28 w-28 rounded-full bg-primary/20 blur-3xl" />
-        </div>
-        <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 border border-orange-50">
-          <div className="flex justify-between items-start mb-6">
-            <div className="space-y-1">
-              <h3 className="text-xl font-black text-slate-900 leading-tight">
-                {tab === 'signup' ? 'Create your account' : 'Welcome back'}
-              </h3>
-              <p className="text-sm text-gray-500">{subtitle}</p>
-            </div>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition"
-              aria-label="Close"
-            >
-              ✕
-            </button>
+  const cardContent = (
+    <div style={{ width: 'min(460px, 100%)' }}>
+      <style>
+        {`
+          .auth-embed-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.25);
+            font-family: "Poppins", "Segoe UI", sans-serif;
+          }
+          .auth-embed-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+          }
+          .auth-embed-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: 0.01em;
+          }
+          .auth-embed-subtitle {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 4px;
+          }
+          .auth-embed-close {
+            border: none;
+            background: transparent;
+            color: #94a3b8;
+            font-size: 14px;
+            cursor: pointer;
+          }
+          .auth-embed-tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            padding: 5px;
+            margin-top: 16px;
+            border-radius: 999px;
+            background: #e2e8f0;
+          }
+          .auth-embed-tab {
+            border: none;
+            background: transparent;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #64748b;
+            padding: 8px 10px;
+            cursor: pointer;
+          }
+          .auth-embed-tab[data-active="true"] {
+            background: #ffffff;
+            color: #0f172a;
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
+          }
+          .auth-embed-alert {
+            margin-top: 12px;
+            border-radius: 12px;
+            border: 1px solid #fed7aa;
+            background: #fff7ed;
+            padding: 10px 12px;
+            font-size: 12px;
+            color: #9a3412;
+          }
+          .auth-embed-form {
+            display: grid;
+            gap: 12px;
+            margin-top: 16px;
+          }
+          .auth-embed-field {
+            display: grid;
+            gap: 6px;
+          }
+          .auth-embed-label {
+            font-size: 11px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #94a3b8;
+            font-weight: 600;
+          }
+          .auth-embed-input-wrap {
+            position: relative;
+            display: block;
+          }
+          .auth-embed-input {
+            width: 100%;
+            height: 44px;
+            border-radius: 12px;
+            border: 1px solid #cbd5f5;
+            background: #ffffff;
+            padding: 0 12px 0 38px;
+            font-size: 14px;
+            color: #0f172a;
+            box-sizing: border-box;
+          }
+          .auth-embed-input:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+          }
+          .auth-embed-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+          }
+          .auth-embed-actions {
+            display: grid;
+            gap: 10px;
+            margin-top: 4px;
+          }
+          .auth-embed-primary {
+            height: 44px;
+            border-radius: 999px;
+            border: none;
+            background: #4f46e5;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 13px;
+            letter-spacing: 0.04em;
+            cursor: pointer;
+          }
+          .auth-embed-primary:hover {
+            background: #4338ca;
+          }
+          .auth-embed-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+          }
+          .auth-embed-divider {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #94a3b8;
+          }
+          .auth-embed-divider::before,
+          .auth-embed-divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: #e2e8f0;
+          }
+          .auth-embed-secondary {
+            height: 42px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            background: #ffffff;
+            color: #0f172a;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+          }
+          .auth-embed-secondary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+          }
+          .auth-embed-footer {
+            margin-top: 14px;
+            text-align: center;
+            font-size: 13px;
+            color: #64748b;
+          }
+          .auth-embed-footer button {
+            background: none;
+            border: none;
+            color: #4f46e5;
+            font-weight: 700;
+            cursor: pointer;
+            padding: 0;
+          }
+          @media (max-width: 520px) {
+            .auth-embed-card {
+              padding: 20px;
+            }
+          }
+        `}
+      </style>
+      <div className="auth-embed-card">
+        <div className="auth-embed-head">
+          <div>
+            <div className="auth-embed-title">{tab === 'signup' ? 'Create your account' : 'Welcome back'}</div>
+            <div className="auth-embed-subtitle">{embedded ? embeddedSubtitle : subtitle}</div>
           </div>
+          {showClose && (
+            <button onClick={onClose} className="auth-embed-close" aria-label="Close">
+              X
+            </button>
+          )}
+        </div>
 
-            {emailNotVerified && (
-              <div className="mb-3 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm">
-                Email not verified. Please click the link sent to your email.
-              </div>
-            )}
+        <div className="auth-embed-tabs" role="tablist" aria-label="Authentication options">
+          <button
+            type="button"
+            className="auth-embed-tab"
+            data-active={tab === 'signup'}
+            onClick={() => switchTab('signup')}
+          >
+            Sign up
+          </button>
+          <button
+            type="button"
+            className="auth-embed-tab"
+            data-active={tab === 'login'}
+            onClick={() => switchTab('login')}
+          >
+            Log in
+          </button>
+        </div>
 
-          <form className="space-y-3" onSubmit={onEmailSubmit}>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-3 flex items-center text-gray-400">
-                <Mail className="w-4 h-4" />
-              </div>
-              <Input
+        {emailNotVerified && (
+          <div className="auth-embed-alert">Email not verified. Please click the link sent to your email.</div>
+        )}
+
+        <form className="auth-embed-form" onSubmit={onEmailSubmit}>
+          <label className="auth-embed-field">
+            <span className="auth-embed-label">Email address</span>
+            <span className="auth-embed-input-wrap">
+              <Mail className="auth-embed-icon" size={16} />
+              <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="Your Email"
-                className="pl-10 h-12 rounded-xl bg-gray-50 border-0 focus-visible:ring-orange-200 text-gray-800 placeholder:text-gray-400"
+                placeholder="name@company.com"
+                autoComplete="email"
+                className="auth-embed-input"
               />
-            </div>
+            </span>
+          </label>
 
-            <div className="relative">
-              <div className="absolute inset-y-0 left-3 flex items-center text-gray-400">
-                <Lock className="w-4 h-4" />
-              </div>
-              <Input
+          <label className="auth-embed-field">
+            <span className="auth-embed-label">Password</span>
+            <span className="auth-embed-input-wrap">
+              <Lock className="auth-embed-icon" size={16} />
+              <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                placeholder="Password"
-                className="pl-10 h-12 rounded-xl bg-gray-50 border-0 focus-visible:ring-orange-200 text-gray-800 placeholder:text-gray-400"
+                placeholder="Enter your password"
+                autoComplete={tab === 'signup' ? 'new-password' : 'current-password'}
+                className="auth-embed-input"
               />
-            </div>
+            </span>
+          </label>
 
-            {tab === 'signup' && (
-              <div className="relative">
-                <div className="absolute inset-y-0 left-3 flex items-center text-gray-400">
-                  <Lock className="w-4 h-4" />
-                </div>
-                <Input
+          {tab === 'signup' && (
+            <label className="auth-embed-field">
+              <span className="auth-embed-label">Confirm password</span>
+              <span className="auth-embed-input-wrap">
+                <Lock className="auth-embed-icon" size={16} />
+                <input
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
-                  placeholder="Confirm Password"
-                  className="pl-10 h-12 rounded-xl bg-gray-50 border-0 focus-visible:ring-orange-200 text-gray-800 placeholder:text-gray-400"
+                  placeholder="Re-enter your password"
+                  autoComplete="new-password"
+                  className="auth-embed-input"
                 />
-              </div>
-            )}
+              </span>
+            </label>
+          )}
 
-            <Button
-              type="submit"
-              disabled={submitting}
-              className="w-full h-12 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold shadow-sm disabled:opacity-70"
-            >
+          <div className="auth-embed-actions">
+            <button type="submit" disabled={submitting} className="auth-embed-primary">
               {submitting ? 'Please wait...' : cta}
-            </Button>
-          </form>
-
-          <div className="mt-3">
-            <Button
+            </button>
+            <div className="auth-embed-divider">Or continue with</div>
+            <button
               type="button"
-              variant="outline"
-              className="w-full h-11 rounded-xl border-gray-200 text-gray-700 bg-white hover:bg-gray-50"
+              className="auth-embed-secondary"
               onClick={onGoogle}
               disabled={googleLoading}
             >
-              <Chrome className="w-4 h-4 mr-2" />
+              <Chrome size={16} />
               {googleLoading ? 'Redirecting...' : 'Google'}
-            </Button>
+            </button>
           </div>
+        </form>
 
-          <div className="mt-6 text-center text-sm text-gray-600">
-            {tab === 'signup' ? (
-              <>
-                Already have an account?{' '}
-                <button
-                  type="button"
-                  className="font-semibold text-orange-600 hover:text-orange-700"
-                  onClick={() => switchTab('login')}
-                >
-                  Login
-                </button>
-              </>
-            ) : (
-              <>
-                New here?{' '}
-                <button
-                  type="button"
-                  className="font-semibold text-orange-600 hover:text-orange-700"
-                  onClick={() => switchTab('signup')}
-                >
-                  Create account
-                </button>
-              </>
-            )}
-          </div>
+        <div className="auth-embed-footer">
+          {tab === 'signup' ? (
+            <>
+              Already have an account?{' '}
+              <button type="button" onClick={() => switchTab('login')}>
+                Log in
+              </button>
+            </>
+          ) : (
+            <>
+              New here?{' '}
+              <button type="button" onClick={() => switchTab('signup')}>
+                Create account
+              </button>
+            </>
+          )}
         </div>
       </div>
+    </div>
+  );
+
+  if (embedded) {
+    return cardContent;
+  }
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 100,
+        backgroundColor: 'rgba(15, 23, 42, 0.6)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '16px',
+      }}
+    >
+      {cardContent}
     </div>
   );
 }
