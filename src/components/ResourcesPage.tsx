@@ -14,28 +14,47 @@ import {
   FileText,
   Gavel,
   Heart,
+  Home,
   Info,
+  TestTube as Tube,
+  TriangleAlert,
+  Smile,
+  Shuffle,
+  Scale,
   MessageSquare,
   Minus,
   Moon,
   Pill,
   Printer,
+  Bath,
   RefreshCcw,
   RotateCcw,
   Shield,
+  Sunrise,
   Syringe,
   UserCheck,
   Users,
   Utensils,
   X,
+  ZapOff,
 } from "lucide-react";
 import LogoImage from "@/assets/asset-1.png";
 
 type AuditScore = "yes" | "no" | "na";
 
 const ICONS = {
+  AlertTriangle,
+  ZapOff,
   RefreshCcw,
+  Sunrise,
+  Home,
+  Smile,
+  TriangleAlert,
+  Tube,
+  Shuffle,
+  Scale,
   MessageSquare,
+  Bath,
   Activity,
   Utensils,
   Shield,
@@ -56,6 +75,7 @@ const AUDIT_SECTIONS: {
   id: string;
   title: string;
   icon: IconName;
+  iconColor?: string;
   cqc: string;
   guidance: string;
   guidanceBullets?: string[];
@@ -66,6 +86,7 @@ const AUDIT_SECTIONS: {
     id: "reviews",
     title: "Care Plan Reviews & Signatures",
     icon: "RefreshCcw",
+    iconColor: "#4F46E5",
     cqc: "QS: Monitoring and Improving Outcomes",
     guidance: "NICE NG189: Evidence involving the person/representative. CQC expects regular, meaningful evaluation of effectiveness.",
     guidanceBullets: [
@@ -87,6 +108,7 @@ const AUDIT_SECTIONS: {
     id: "communication",
     title: "Catheter Care & Management",
     icon: "Droplets",
+    iconColor: "#3b82f6",
     cqc: "CQC Regulation 12: NICE PH36 & QS61",
     guidance: "NICE PH36 & QS61: Evidence of catheter necessity review, CAUTI prevention, and complication management.",
     guidanceBullets: [
@@ -107,6 +129,7 @@ const AUDIT_SECTIONS: {
     id: "mobility",
     title: "Communication Needs",
     icon: "MessageSquare",
+    iconColor: "#4F46E5",
     cqc: "CQC Accessible Information Standard (AIS): Regulation 9",
     guidance: "Accessible Information Standard: Evidence of communication preferences and support needs.",
     guidanceBullets: [
@@ -128,145 +151,340 @@ const AUDIT_SECTIONS: {
   },
   {
     id: "nutrition",
-    title: "Nutrition & Hydration",
-    icon: "Utensils",
-    cqc: "QS: Supporting People to Live Healthier Lives",
-    guidance: "NICE CG32: MUST screening. CQC expects evidence of person-centered dietary needs.",
+    title: "Continence & Bowel Management",
+    icon: "Droplets",
+    iconColor: "#3b82f6",
+    cqc: "CQC Regulation 12 & 14: NICE CG99",
+    guidance: "NICE CG99: Person-centred continence assessments, bowel management, and escalation planning.",
+    guidanceBullets: [
+      "NICE CG99: Clinical assessment must identify the *type* of incontinence (urge, stress, etc) before choosing products.",
+      "CQC Focus: Excessive use of high-absorbency pads without a toileting plan is often viewed as institutional abuse.",
+      "Best Practice: Use the Bristol Stool Scale for every entry and set clear 'Day 3' escalation triggers for laxatives.",
+    ],
+    expectedStandard:
+      "A plan promoting independence and using clinical tools like the Bristol Stool Scale accurately.",
     items: [
-      "Is the MUST score calculated correctly and updated monthly?",
-      "Are IDDSI levels for food and fluids clearly stated?",
-      "Are food preferences (likes/dislikes) and allergies documented?",
-      "Is there a clear weight management plan for scores of 1 or higher?",
+      "Is the identified need written in a person-centred manner, referring to dignity?",
+      "Is there a comprehensive Continence Assessment identifying 'Type'?",
+      "Does the plan specify EXACT product type, size, and absorbency?",
+      "Is there a 'Bowel Management Plan' using the Bristol Stool Scale?",
+      "Does the plan identify a clear 'Escalation Protocol' for constipation?",
     ],
   },
   {
     id: "skin",
-    title: "Tissue Viability (Skin Care)",
-    icon: "Shield",
-    cqc: "QS: Safe and Effective Care",
-    guidance: "NICE CG179: Risk assessment within 6 hours. CQC focuses on pressure ulcer prevention.",
+    title: "Diabetes Care (Type 1 & Type 2)",
+    icon: "Activity",
+    iconColor: "#16a34a",
+    cqc: "CQC Regulation 12 (Safe Care): NICE NG28",
+    guidance: "NICE NG28: Diagnosis detail, glucose targets, insulin management, and foot care.",
+    guidanceBullets: [
+      "NICE NG28: Blood glucose targets must be individualised; 'one size fits all' ranges (e.g., 4-7) are outdated for elderly patients.",
+      "Safe Care: Site rotation maps are required to prevent lipohypertrophy.",
+      "Best Practice: Ensure 'Hypo Boxes' are checked monthly and the rescue plan is displayed on a single, clear page.",
+    ],
+    expectedStandard:
+      "A plan that allows staff to act immediately during a hypo and monitors glucose within specific clinical ranges.",
     items: [
-      "Is the Waterlow/Branden score accurate and monthly?",
-      "Are repositioning intervals (e.g. 4-hourly) specified based on risk?",
-      "Is the mattress type and current pump setting recorded?",
-      "Are current wounds mapped and have an active treatment plan?",
+      "Diagnosis Detail: Does the care plan clearly specify if the resident has Type 1 or Type 2 Diabetes?",
+      "Blood Glucose Monitoring: Are there clear 'Target Ranges' specified by a clinician?",
+      "Insulin Management: If on insulin, does the plan specify the type and site rotation?",
+      "Emergency Action Plan: Is there a 'Hypo Rescue Plan' detailing exactly what to give?",
+      "Foot Care: Is there a specific Diabetes Foot Risk Assessment documented?",
     ],
   },
   {
     id: "continence",
-    title: "Continence & Catheter Care",
-    icon: "Droplets",
-    cqc: "QS: Involving People",
-    guidance: "NICE CG171 (Continence) & QS61 (Infection Control).",
+    title: "End of Life & Advance Care Planning",
+    icon: "Sunrise",
+    iconColor: "#f97316",
+    cqc: "CQC Quality Statement: Compassionate End of Life Care; NICE NG142",
+    guidance: "NICE NG142: Advance decisions, preferences, and culturally sensitive end-of-life planning.",
+    guidanceBullets: [
+      "NICE NG142: Care must be based on the person's 'Lasting Power of Attorney' status and documented priorities.",
+      "CQC Requirement: DNR (ReSPECT) forms must be the original, signed, and clearly visible for paramedics.",
+      "Best Practice: Revisit EoL wishes every 6 months, as priorities often change during health fluctuations.",
+    ],
+    expectedStandard: "Highly personal plans that ensure dignity and respect for final wishes.",
     items: [
-      "Is the specific pad type/size/absorbency documented?",
-      "If catheterised: are insertion date and change due date recorded?",
-      "Are catheter size and balloon volume (e.g. 10ml) documented?",
-      "Is a toileting schedule in place for those requiring assistance?",
+      "Is there an 'Advance Decision to Refuse Treatment' (ADRT) or DNR form present?",
+      "Does the plan record the person's wishes regarding their place of death?",
+      "Are spiritual, religious, or cultural rites documented?",
+      "Is there a 'Preferred Priorities of Care' (PPC) document in the file?",
     ],
   },
   {
     id: "diabetes",
-    title: "Diabetes Management",
-    icon: "Syringe",
-    cqc: "QS: Managing Risk",
-    guidance: "NICE NG28. Evidence of hypo management and foot health.",
+    title: "Epilepsy & Seizure Management",
+    icon: "ZapOff",
+    iconColor: "#ef4444",
+    cqc: "CQC Regulation 12: Safe Care; NICE NG217",
+    guidance: "NICE NG217: Individualised seizure management, triggers, and emergency protocols.",
+    guidanceBullets: [
+      "NICE NG217: Every resident with epilepsy must have a detailed seizure description (aura, movements, post-ictal state).",
+      "CQC Safety: Staff must have documented training in 'Rescue Medication' (Midazolam) if it is prescribed.",
+      "Best Practice: Use a seizure diary to track frequency and link patterns to medication reviews.",
+    ],
+    expectedStandard: "A plan that provides specific instructions for rescue meds and post-seizure recovery.",
     items: [
-      "Is there a person-specific Hypo Treatment Plan?",
-      "Are target blood glucose ranges prescribed and recorded?",
-      "Is there evidence of daily/weekly foot checks for diabetic residents?",
-      "Is the frequency of BG monitoring clearly stated?",
+      "Is there a person-specific Epilepsy Care Plan describing unique seizure types?",
+      "Does the plan identify known 'Triggers'?",
+      "Is there a clear 'Step-by-Step' First Aid guide for staff to follow?",
+      "Is there an 'Emergency Protocol' (Rescue Meds) specified?",
     ],
   },
   {
-    id: "medication",
-    title: "Medication Support",
-    icon: "Pill",
-    cqc: "QS: Medicines Optimization",
-    guidance: "NICE SC1. Focus on PRN protocols and covert pathways.",
+    id: "safety",
+    title: "Maintaining Safety",
+    icon: "Home",
+    iconColor: "#4F46E5",
+    cqc: "CQC Regulation 12 & 15",
+    guidance: "Health and safety checks must be person-specific and tied to the care plan.",
+    guidanceBullets: [
+      "HSE & CQC: Room assessments must be person-specific (e.g., risk of falling from a specific bed height).",
+      "Best Practice: Include sensory adjustments for dementia (e.g., non-patterned carpets, appropriate lighting levels).",
+      "Regulatory: Ensure daily/weekly safety checks for equipment (bed rails, call bells) are linked to the care plan.",
+    ],
+    expectedStandard:
+      "Documentation showing how the person's room reflects their choice while managing safety risks.",
     items: [
-      'Are "As Required" (PRN) protocols detailed (Why, When, Max Dose)?',
-      "Is there a signed Covert Meds pathway/MCA if applicable?",
-      "Are medication allergies prominently recorded in the care plan?",
-      "Is there a plan for non-compliance or refusal?",
+      "Does the plan reflect the person's 'Homely' choices and personality in the environment?",
+      "Is there a specific 'Room Risk Assessment' identifying hazards/safety checks?",
+      "Are window restrictors and radiator covers documented as checked?",
+      "Does the environment plan reflect specific sensory needs (lighting, noise)?",
     ],
   },
   {
-    id: "mca",
-    title: "MCA & DoLS",
-    icon: "Gavel",
-    cqc: "QS: Consent to Care and Treatment",
-    guidance: "NICE NG108. Focus on decision-specific assessments.",
+    id: "capacity",
+    title: "Mental Capacity & Consent",
+    icon: "Scale",
+    iconColor: "#4F46E5",
+    cqc: "Mental Capacity Act 2005; CQC Regulation 11",
+    guidance: "MCA requires decision-specific capacity assessments and documented best interests.",
+    guidanceBullets: [
+      "MCA Code of Practice: Assessments must be decision-specific. A 'Global' capacity assessment is legally invalid.",
+      "CQC Focus: Ensure DoLS recorded mentions (e.g., taking the person out weekly) are actually written into the care plan.",
+      "Best Practice: Always document the Least Restrictive options considered before a restrictive decision was made.",
+    ],
+    expectedStandard:
+      "Clear documentation of who makes decisions and evidence of the least restrictive option.",
     items: [
-      "Is there a decision-specific MCA for care, residence, and meds?",
-      "Is the DoLS status (Authorised/Pending) accurately recorded?",
-      'Is there evidence of the "Least Restrictive" principle being applied?',
-      "Are Best Interests decisions documented and involve relevant others?",
+      "Is there evidence of a capacity assessment for specific complex decisions?",
+      "Are 'Best Interest Decisions' documented and involve family/advocates?",
+      "If the person is deprived of their liberty, is a valid DoLS/LPS authorization in place?",
+      "Is there a record of 'Lasting Power of Attorney' (Health & Welfare)?",
     ],
   },
   {
-    id: "personal",
-    title: "Personal Care & Oral Health",
-    icon: "UserCheck",
-    cqc: "QS: Person-centred Care",
-    guidance: "NICE NG48 (Oral health). Evidence of daily hygiene routines.",
+    id: "mobilityTransfers",
+    title: "Mobility & Transfers",
+    icon: "Shuffle",
+    iconColor: "#4F46E5",
+    cqc: "LOLER 1998; CQC Regulation 12 & 15",
+    guidance: "LOLER: Equipment safety, sling suitability, and documented handling risks.",
+    guidanceBullets: [
+      "LOLER Regulations: Any equipment mentioned must have a valid 6-monthly service sticker.",
+      "Best Practice: Slings are 'Prescribed Items'. They must be sized to the individual, not shared across the unit.",
+      "NICE QS86: Emphasizes maintaining independence; the plan should describe what the person 'can' still do (e.g., can weight bear for 10 seconds).",
+    ],
+    expectedStandard: "A plan that leaves no room for error regarding which sling or hoist to use.",
     items: [
-      "Is the preferred bathing frequency and method (bath/shower) documented?",
-      "Is there a specific Oral Health plan for natural teeth or dentures?",
-      "Are grooming preferences (shaving, hair, make-up) recorded?",
-      "Are preferences for gender of carer documented?",
+      "Does the care plan specify the exact equipment required (e.g. brand/model of hoist)?",
+      "Is the sling type and size explicitly documented?",
+      "Does the plan match the 'Moving & Handling' risk assessment?",
+      "Is the level of staff assistance (e.g. x1 or x2) clearly stated?",
     ],
   },
   {
-    id: "sleep",
-    title: "Night Care & Sleep",
-    icon: "Moon",
-    cqc: "QS: Responding to People's Immediate Needs",
-    guidance: "CQC expects care to reflect night-time preferences.",
+    id: "nutritionHydration",
+    title: "Nutrition & Hydration",
+    icon: "Utensils",
+    iconColor: "#f97316",
+    cqc: "CQC Regulation 14; NICE QS15",
+    guidance: "NICE QS15: Nutritional support, IDDSI compliance, and fluid target monitoring.",
+    guidanceBullets: [
+      "NICE CG32: Nutritional support must start immediately for high MUST scores (score 2+).",
+      "CQC Regulation 14: Fluid targets must be clinical (e.g., 30ml per kg) and not a generic 'plenty of fluids'.",
+      "Best Practice: Integrate IDDSI posters into the kitchen/dining area and link them to individual care plans.",
+    ],
+    expectedStandard:
+      "Detailed IDDSI guidance and clear evidence that staff act when targets are not met.",
     items: [
-      "Is the preferred bedtime and waking routine described?",
-      "Are night check frequencies (e.g. hourly) specified?",
-      "Are preferences for lighting, temperature, and door status noted?",
-      "Does the plan address interventions for night-time wakefulness?",
+      "Is there a clear 'Daily Fluid Target' documented (e.g., 1600ml)?",
+      "Are food preferences, allergies, and intolerances highlighted?",
+      "Does the plan specify required food textures (IDDSI levels)?",
+      "Are fluid/food charts being totaled and analyzed for trends daily?",
     ],
   },
   {
-    id: "social",
-    title: "Social, Life History & Occupation",
-    icon: "Users",
-    cqc: "QS: Equity in Experiences and Outcomes",
-    guidance: 'NICE NG189. Evidence of "Meaningful Occupation".',
+    id: "oralHealth",
+    title: "Oral Health & Dental Care",
+    icon: "Smile",
+    iconColor: "#ec4899",
+    cqc: "CQC Quality Statement: Safe & Effective; NICE NG48",
+    guidance: "NICE NG48: Oral health assessments, hygiene routines, and product-specific care.",
+    guidanceBullets: [
+      "NICE NG48: Oral health must be assessed on admission and reviewed at least quarterly.",
+      "CQC 'Smiling Matters': Inadequate mouth care is linked to aspiration pneumonia; documentation must show daily checks.",
+      "Best Practice: Name the specific toothbrush type (soft/electric) and toothpaste (ppm fluoride) used.",
+    ],
+    expectedStandard: "Detailed instructions on denture care and specific preferences for oral hygiene.",
     items: [
-      "Is a detailed Life History / Pen Portrait included?",
-      "Are current social interests and hobbies clearly identified?",
-      "Is there a record of significant family/friend relationships?",
-      "Are cultural or religious preferences documented?",
+      "Is there a specific Oral Health Assessment (e.g., OHAT) completed?",
+      "Does the plan specify the frequency of mouth care?",
+      "Are specific products named (e.g., high-fluoride toothpaste)?",
+      "If the person has dentures, is the cleaning routine documented?",
     ],
   },
   {
-    id: "mental",
-    title: "Mental Health & Behavior",
+    id: "pain",
+    title: "Pain Management & Assessment",
+    icon: "TriangleAlert",
+    iconColor: "#ef4444",
+    cqc: "CQC Regulation 12: Safe Care; NICE NG92",
+    guidance: "NICE NG92: Pain assessment, dementia-specific observation, and PRN linkage.",
+    guidanceBullets: [
+      "NICE NG92: Pain management in dementia must rely on observation of behaviour, not just verbal reports.",
+      "CQC Safeguarding: Persistent pain is a common trigger for 'distressed behaviour'; look for links between the two plans.",
+      "Best Practice: Document non-pharmacological interventions (e.g., positioning, heat packs) before PRN meds.",
+    ],
+    expectedStandard: "A plan that helps staff identify non-verbal cues for pain and links them to the PRN protocol.",
+    items: [
+      "Does the care plan document how the person expresses pain?",
+      "Is a recognized tool (e.g., Abbey Pain Scale) in use for non-verbal residents?",
+      "Is there a clear link between the pain assessment and the 'PRN' protocol?",
+      "Is PRN medication evaluated for effectiveness 30-60 minutes after administration?",
+    ],
+  },
+  {
+    id: "peg",
+    title: "PEG Care & Enteral Nutrition",
+    icon: "Tube",
+    iconColor: "#6366f1",
+    cqc: "CQC Regulation 12: Safe Care; NICE CG32",
+    guidance: "NICE CG32: Safe enteral feeding, stoma checks, and emergency protocols.",
+    guidanceBullets: [
+      "NICE CG32: Detailed flushing protocols (pre/post meds) are essential to prevent blockages.",
+      "Safe Care: The stoma site must be checked daily for signs of infection or over-granulation.",
+      "Best Practice: Keep a 'PEG Passport' with the resident for hospital transfers, detailing tube specifications.",
+    ],
+    expectedStandard: "Clear step-by-step instructions for site care and emergency contact numbers.",
+    items: [
+      "Is there a PEG-specific Risk Assessment in place?",
+      "Does the plan specify the tube type, size, and insertion date?",
+      "Is there guidance on daily stoma site care?",
+      "Is there an 'Emergency Protocol' in place for a displaced tube?",
+    ],
+  },
+  {
+    id: "personalCare",
+    title: "Personal Care & Grooming",
+    icon: "Bath",
+    iconColor: "#ec4899",
+    cqc: "CQC Regulation 9: Person-Centred Care",
+    guidance: "Person-centred care requires clear grooming preferences and independence support.",
+    guidanceBullets: [
+      "CQC Quality Statement: Responding to people's immediate needs - care must respect cultural identity and grooming habits.",
+      "Best Practice: Make away from 'Needs 1 to assist' toward 'Prefers to wash face independently but needs help with lower body'.",
+      "NICE SC1: Emphasizes that personal care should never feel like a 'task' but a shared interaction.",
+    ],
+    expectedStandard:
+      "A plan that allows a new staff member to support a resident exactly as they prefer.",
+    items: [
+      "Does the plan record the person's preference for bath vs shower?",
+      "Are specific grooming preferences (shaving, makeup, hair) documented?",
+      "Are cultural/religious requirements for personal care addressed?",
+      "Is there guidance on the level of independence the person wishes to maintain?",
+    ],
+  },
+  {
+    id: "positiveBehaviour",
+    title: "Positive Behaviour Support",
     icon: "Brain",
-    cqc: "QS: Safe and Effective Care",
-    guidance: "NICE NG10. Focus on de-escalation and non-drug interventions.",
+    iconColor: "#f59e0b",
+    cqc: "CQC Regulation 12 / 13",
+    guidance:
+      "CQC Right Support, Right Care, Right Culture: PBS plans must identify unmet needs and reduce restrictive practice.",
+    guidanceBullets: [
+      "CQC Right Support, Right Care, Right Culture: Focus on PBS plans that identify unmet needs (pain, hunger, boredom).",
+      "Regulatory: Any PRN 'for behaviour' must have a clear protocol and be monitored for overuse.",
+      "Best Practice: Use the 'ABC' (Antecedent, Behaviour, Consequence) model to identify and eliminate triggers.",
+    ],
+    expectedStandard:
+      "Staff guidance that focuses on de-escalation through understanding unmet needs.",
     items: [
-      "Are specific triggers for distress or anxiety identified?",
-      "Are non-pharmacological de-escalation techniques listed?",
-      "Is there an ABC (Antecedent-Behaviour-Consequence) chart in use?",
-      "Does the plan mention specific techniques for orientation/reassurance?",
+      "Is the plan written to help staff understand the 'Person' behind the distress?",
+      "Are triggers and de-escalation strategies clearly defined?",
+      "Is there evidence of 'Least Restrictive Practice' being applied?",
+      "Does the plan identify environmental factors that affect behaviour?",
     ],
   },
   {
-    id: "eol",
-    title: "End of Life & Advanced Planning",
-    icon: "Heart",
-    cqc: "QS: Care Provision, Integration and Continuity",
-    guidance: "NICE NG142. Evidence of Advance Decisions.",
+    id: "riskAssessment",
+    title: "Risk Assessment Tools Audit",
+    icon: "Shield",
+    iconColor: "#ef4444",
+    cqc: "CQC Regulation 12 & 17",
+    guidance:
+      "CQC Quality Statement: Safe systems, pathways and transitions require risks to be shared across the team.",
+    guidanceBullets: [
+      "CQC Quality Statement: Safe systems, pathways and transitions require risks to be shared across the team.",
+      "NICE CG161: Falls prevention must include a multifactorial assessment (vision, footwear, environment, medication).",
+      "Best Practice: Dynamic Risk Assessment—staff should be trained to update the plan as soon as a change is noted.",
+    ],
+    expectedStandard:
+      "A high MUST score is immediately followed by a food fortification plan and dietician referral.",
     items: [
-      "Is the DNACPR / ReSPECT form status clearly visible?",
-      "Is the Preferred Place of Death (PPoD) documented?",
-      "Are spiritual, cultural, or religious wishes for end-of-life recorded?",
-      "Is there an Advance Statement or Advance Decision (ADRT)?",
+      "MUST Tool: Is the assessment complete and followed by action if high risk?",
+      "Falls Risk Assessment: Does the care plan include specific prevention strategies?",
+      "Choking Risk Assessment: Does the plan reflect recent SALT advice?",
+      "Responsiveness: Are risk assessments updated immediately following an incident?",
+    ],
+  },
+  {
+    id: "skinIntegrity",
+    title: "Skin Integrity & Pressure Care",
+    icon: "Heart",
+    iconColor: "#10b981",
+    cqc: "CQC Regulation 12; NICE CG179; NICE NG19",
+    guidance:
+      "NICE CG179: Pressure ulcer prevention requires documented repositioning and wound care focus if risk is high.",
+    guidanceBullets: [
+      "NICE CG179: Pressure ulcer prevention requires a documented 'repositioning schedule' if risk is high.",
+      "CQC Focus: Missing daily skin checks is the #1 cause of failure to provide safe care in residential settings.",
+      "Best Practice: Include photos (with consent) to show the progression or healing of any skin breaks.",
+    ],
+    expectedStandard:
+      "A comprehensive wound record that shows the 'journey' of the wound with visual evidence.",
+    items: [
+      "Is there a current Waterlow or Braden risk assessment score recorded?",
+      "Does the care plan specify the frequency of repositioning?",
+      "Are specific pressure-relieving items (mattresses/cushions) named and set correctly?",
+      "Is there a 'Body Map' in use for daily skin checks?",
+      "Wound Care Plans: Are they fully completed with measurements and photos?",
+    ],
+  },
+  {
+    id: "sleepingSupport",
+    title: "Sleeping & Night-Time Support",
+    icon: "Moon",
+    iconColor: "#6366f1",
+    cqc: "CQC Regulation 9 & 12; NICE NG97",
+    guidance:
+      "Personalization: Plans must specify details like bed times, lighting preferences, and snack routines to support psychological well-being.",
+    guidanceBullets: [
+      "Personalization: Plans must specify details like bed times, lighting preferences, and snack routines to support psychological well-being.",
+      "Safety & Risk: 'Medical conditions affecting night safety' (e.g., nocturnal seizures, heart failure) must have an escalation plan.",
+      "Least Restrictive: Equipment like bed rails or pressure mats require a documented Best Interest Decision or explicit consent to avoid 'unlawful restraint'.",
+      "Continence: Support for overnight toileting (e.g., commode placement) should balance safety with the promotion of dignity.",
+    ],
+    expectedStandard:
+      "A night profile that allows staff to maintain the person's safety and comfort without unnecessary intrusion, clearly identifying how they summon help.",
+    items: [
+      "Does the plan specify the person's exact sleep patterns (times) and the specific level of independence/assistance needed at night?",
+      "Are environment and routine preferences (pillows, lighting, snacks, staff gender) clearly defined to reduce night-time anxiety?",
+      "Is there evidence of risk assessments for all night-time equipment (bed rails, mats) and a clinical rationale for repositioning frequencies?",
+      "Are medical risks and emergency communication (call bell position/accessibility) clearly documented for night staff?",
     ],
   },
 ];
@@ -612,13 +830,19 @@ export function ResourcesPage() {
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                   <div className="flex items-start gap-3">
                     <div
-                      className="h-9 w-9 rounded-lg flex items-center justify-center"
-                      style={{ backgroundColor: "#eef2ff", border: "1px solid #e0e7ff", color: "#4F46E5" }}
+                      className="flex items-center justify-center"
+                      style={{
+                        backgroundColor: "transparent",
+                        border: "none",
+                        color: section.iconColor || "#4F46E5",
+                        width: "28px",
+                        height: "28px",
+                      }}
                     >
                       {section.id === "reviews" ? (
-                        <ClipboardCheck className="w-5 h-5" />
+                        <ClipboardCheck className="w-6 h-6" />
                       ) : (
-                        <Icon name={section.icon} className="w-5 h-5" />
+                        <Icon name={section.icon} className="w-6 h-6" />
                       )}
                     </div>
                     <div style={{ minWidth: 0 }}>
@@ -809,50 +1033,154 @@ export function ResourcesPage() {
             </section>
           ))}
         </div>
-        <div className="mt-12 space-y-8">
-          <div className="bg-slate-900 text-white p-8 rounded-3xl shadow-xl flex flex-col md:flex-row justify-between items-center gap-8">
-            <div className="text-center md:text-left">
-              <h2 className="text-5xl font-black tracking-tighter">{stats.percent}%</h2>
-              <p className="text-indigo-400 text-[10px] font-black uppercase tracking-widest mt-1">Audit Score</p>
+        <div style={{ marginTop: "48px" }}>
+          <section
+            style={{
+              borderRadius: "18px",
+              overflow: "hidden",
+              border: "1px solid #0B1220",
+              boxShadow: "0 18px 36px rgba(2, 6, 23, 0.35)",
+            }}
+          >
+            <div style={{ height: "4px", backgroundColor: "#5049E2" }} />
+            <div
+              style={{
+                backgroundColor: "#0F1729",
+                padding: "18px 24px 12px",
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+              }}
+            >
+              <ClipboardCheck className="h-5 w-5" style={{ color: "#F23D60" }} />
+              <h2
+                style={{
+                  margin: 0,
+                  color: "#FFFFFF",
+                  fontSize: "16px",
+                  fontWeight: 800,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.04em",
+                }}
+              >
+                Smart Action Plan
+              </h2>
             </div>
-            <div className="flex-1 max-w-sm w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-              <div className="h-full bg-indigo-500 transition-all duration-1000" style={{ width: `${stats.percent}%` }} />
-            </div>
-            <div className="text-center md:text-right">
-              <div className="bg-indigo-500/20 text-indigo-300 px-4 py-1 rounded-full text-[10px] font-black uppercase mb-1">
-                CQC Grade Potential
+            <div style={{ backgroundColor: "#0F1729", padding: "0 24px 24px" }}>
+              <div
+                style={{
+                  backgroundColor: "#121A2D",
+                  border: "1px dashed #2E3B4D",
+                  borderRadius: "14px",
+                  padding: "22px 16px",
+                  textAlign: "center",
+                  color: "#64748A",
+                  fontSize: "11px",
+                  fontWeight: 600,
+                  letterSpacing: "0.3em",
+                  textTransform: "uppercase",
+                }}
+              >
+                {stats.fails.length > 0 ? "Actions required based on failed criteria" : "Full compliance achieved"}
               </div>
-              <p className="text-lg font-bold">
-                {stats.percent >= 90 ? "Outstanding" : stats.percent >= 75 ? "Good" : "Needs Improvement"}
-              </p>
+              {stats.fails.length > 0 && (
+                <div style={{ marginTop: "16px", display: "grid", gap: "12px" }}>
+                  {stats.fails.map((fail, i) => (
+                    <div
+                      key={`${fail.section}-${i}`}
+                      style={{
+                        borderRadius: "12px",
+                        border: "1px solid #1E293A",
+                        backgroundColor: "#0F1729",
+                        padding: "12px 14px",
+                      }}
+                    >
+                      <div style={{ marginBottom: "8px" }}>
+                        <span style={{ fontSize: "9px", fontWeight: 800, color: "#F23D60", textTransform: "uppercase", letterSpacing: "0.2em" }}>
+                          {fail.section}
+                        </span>
+                        <p style={{ margin: "4px 0 0", fontSize: "12px", fontWeight: 700, color: "#E5E7EB" }}>{fail.item}</p>
+                      </div>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "10px" }}>
+                        <input
+                          type="text"
+                          placeholder="Corrective Action"
+                          style={{
+                            backgroundColor: "#121A2D",
+                            border: "1px solid #2E3B4D",
+                            borderRadius: "8px",
+                            padding: "6px 8px",
+                            fontSize: "10px",
+                            color: "#E5E7EB",
+                          }}
+                        />
+                        <input
+                          type="text"
+                          placeholder="Assigned To"
+                          style={{
+                            backgroundColor: "#121A2D",
+                            border: "1px solid #2E3B4D",
+                            borderRadius: "8px",
+                            padding: "6px 8px",
+                            fontSize: "10px",
+                            color: "#E5E7EB",
+                          }}
+                        />
+                        <input
+                          type="date"
+                          style={{
+                            backgroundColor: "#121A2D",
+                            border: "1px solid #2E3B4D",
+                            borderRadius: "8px",
+                            padding: "6px 8px",
+                            fontSize: "10px",
+                            color: "#C7CED8",
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          </div>
-
-          {stats.fails.length > 0 && (
-            <div className="bg-white border-2 border-slate-200 rounded-3xl p-8">
-              <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight mb-6 flex items-center gap-3">
-                <AlertTriangle className="text-rose-500 w-5 h-5" /> Remediation Requirements
-              </h3>
-              <div className="space-y-4">
-                {stats.fails.map((fail, i) => (
-                  <div key={`${fail.section}-${i}`} className="p-5 bg-slate-50 rounded-2xl border border-slate-100">
-                    <div className="mb-2">
-                      <span className="text-[9px] font-black text-rose-500 uppercase tracking-widest">{fail.section}</span>
-                      <p className="text-xs font-bold text-slate-800">{fail.item}</p>
-                    </div>
-                    <div className="bg-white p-3 rounded-xl border border-slate-100 text-[10px] text-slate-600 mb-4">
-                      <strong>Standards Guidance:</strong> {fail.guidance}
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <input type="text" className="bg-white border border-slate-200 p-2 text-[10px] rounded-lg" placeholder="Corrective Action" />
-                      <input type="text" className="bg-white border border-slate-200 p-2 text-[10px] rounded-lg" placeholder="Assigned To" />
-                      <input type="date" className="bg-white border border-slate-200 p-2 text-[10px] rounded-lg" />
-                    </div>
+            <div
+              style={{
+                backgroundColor: "#020617",
+                padding: "22px 24px 24px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: "16px",
+              }}
+            >
+              <div>
+                <div style={{ color: "#FFFFFF", fontSize: "16px", fontWeight: 800, textTransform: "uppercase" }}>
+                  Audit Score
+                </div>
+                <div style={{ color: "#9D9EA5", fontSize: "9px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", marginTop: "2px" }}>
+                  Total clinical compliance rating
+                </div>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "22px" }}>
+                <div style={{ textAlign: "center" }}>
+                  <div style={{ color: "#3CD39A", fontSize: "34px", fontWeight: 800 }}>{stats.percent}%</div>
+                  <div style={{ color: "#475568", fontSize: "9px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em" }}>
+                    Compliance
                   </div>
-                ))}
+                </div>
+                <div style={{ width: "1px", height: "46px", backgroundColor: "#1E293A" }} />
+                <div style={{ textAlign: "center" }}>
+                  <div style={{ color: "#828DF5", fontSize: "34px", fontWeight: 800 }}>
+                    {stats.met}/{stats.total}
+                  </div>
+                  <div style={{ color: "#475568", fontSize: "9px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em" }}>
+                    Passed/Total
+                  </div>
+                </div>
               </div>
             </div>
-          )}
+          </section>
         </div>
       </div>
     </div>
