@@ -386,10 +386,10 @@ export function ContactPage() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-16 bg-accent">
+      <section className="py-16 bg-accent text-foreground">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-center mb-12 text-white">Frequently Asked Questions</h2>
+            <h2 className="text-center mb-12">Frequently Asked Questions</h2>
             <div className="space-y-6">
               <Card>
                 <CardHeader>

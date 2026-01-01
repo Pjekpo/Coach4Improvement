@@ -300,11 +300,11 @@ export function PackagesPage({ onOpenBooking }: PackagesPageProps) {
       </section>
 
       {/* One-off Services */}
-      <section className="py-16 bg-accent">
+      <section className="py-16 bg-accent text-foreground">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="mb-4 text-white">One-off Services</h2>
-            <p className="text-white/90 max-w-2xl mx-auto">
+            <h2 className="mb-4">One-off Services</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
               Need specific support without a subscription? We offer individual services tailored to your needs.
             </p>
           </div>

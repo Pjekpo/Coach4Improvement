@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Helmet } from "react-helmet-async";
 import {
   AlertTriangle,
@@ -39,8 +39,11 @@ import {
   ZapOff,
 } from "lucide-react";
 import LogoImage from "@/assets/asset-1.png";
+import { supabase, supabaseConfigured } from "@/lib/supabase";
+import { useAuth } from "@/auth/AuthProvider";
 
 type AuditScore = "yes" | "no" | "na";
+type AccessState = "checking" | "signed-out" | "allowed" | "denied" | "error";
 
 const ICONS = {
   AlertTriangle,
@@ -496,18 +499,37 @@ function Icon({ name, className }: { name: IconName; className?: string }) {
 
 export function ResourcesPage() {
   const [scores, setScores] = useState<Record<string, AuditScore | undefined>>({});
+  const [comments, setComments] = useState<Record<string, string>>({});
   const today = new Date().toISOString().split("T")[0];
   const [meta, setMeta] = useState({ auditor: "", serviceUser: "", date: today });
   const [openGuidance, setOpenGuidance] = useState<Record<string, boolean>>({});
+  const [accessState, setAccessState] = useState<AccessState>("checking");
+  const [accessMessage, setAccessMessage] = useState<string | null>(null);
+  const [emailInput, setEmailInput] = useState("");
+  const [passwordInput, setPasswordInput] = useState("");
+  const [signingIn, setSigningIn] = useState(false);
+  const { user, signInWithEmail, signInWithGoogle, signOut } = useAuth();
   const exportBaseColor = "#4F46E5";
   const exportHoverColor = "#4338ca";
   const clearBaseColor = "#303a4b";
   const clearHoverColor = "#3a465a";
 
   const handleScore = (key: string, val: AuditScore) => setScores((prev) => ({ ...prev, [key]: val }));
-  const clearAll = () => {
-    setScores({});
-    setMeta({ auditor: "", serviceUser: "", date: today });
+  const clearSection = (sectionId: string) => {
+    setScores((prev) => {
+      const next = { ...prev };
+      const prefix = `${sectionId}-`;
+      Object.keys(next).forEach((key) => {
+        if (key.startsWith(prefix)) delete next[key];
+      });
+      return next;
+    });
+    setComments((prev) => {
+      if (!(sectionId in prev)) return prev;
+      const next = { ...prev };
+      delete next[sectionId];
+      return next;
+    });
   };
   const toggleGuidance = (sectionId: string) => {
     setOpenGuidance((prev) => ({ ...prev, [sectionId]: !prev[sectionId] }));
@@ -525,6 +547,82 @@ export function ResourcesPage() {
     window.addEventListener("afterprint", restoreTitle);
     window.print();
     window.setTimeout(restoreTitle, 1000);
+  };
+
+  useEffect(() => {
+    if (!supabaseConfigured || !supabase) {
+      setAccessState("error");
+      setAccessMessage("Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.");
+      return;
+    }
+
+    if (!user) {
+      setAccessState("signed-out");
+      setAccessMessage(null);
+      return;
+    }
+
+    let active = true;
+    setAccessState("checking");
+    setAccessMessage(null);
+
+    (async () => {
+      const filters: string[] = [];
+      if (user.id) filters.push(`user_id.eq.${user.id}`);
+      if (user.email) filters.push(`email.eq.${user.email}`);
+      if (!filters.length) {
+        if (active) setAccessState("denied");
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("allowed_users")
+        .select("id, allowed")
+        .eq("allowed", true)
+        .or(filters.join(","))
+        .limit(1)
+        .maybeSingle();
+
+      if (!active) return;
+      if (error) {
+        setAccessState("error");
+        setAccessMessage("Unable to verify access. Please contact support.");
+        return;
+      }
+
+      setAccessState(data ? "allowed" : "denied");
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, [user]);
+
+  const handleEmailSignIn = async (event: FormEvent) => {
+    event.preventDefault();
+    setAccessMessage(null);
+    setSigningIn(true);
+    try {
+      await signInWithEmail(emailInput.trim(), passwordInput);
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "Sign-in failed.";
+      setAccessMessage(msg);
+    } finally {
+      setSigningIn(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setAccessMessage(null);
+    setSigningIn(true);
+    try {
+      await signInWithGoogle();
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "Unable to start Google sign-in.";
+      setAccessMessage(msg);
+    } finally {
+      setSigningIn(false);
+    }
   };
 
   const stats = useMemo(() => {
@@ -558,7 +656,13 @@ export function ResourcesPage() {
         <link rel="canonical" href="https://coach4improvement.co.uk/resources" />
       </Helmet>
       <div className="relative max-w-6xl mx-auto p-4 md:py-12">
-        <div>
+        <div
+          style={{
+            filter: accessState === "allowed" ? "none" : "blur(6px)",
+            pointerEvents: accessState === "allowed" ? "auto" : "none",
+            transition: "filter 0.2s ease",
+          }}
+        >
           <div
             className="mb-8 overflow-hidden shadow-lg"
             style={{ borderColor: "transparent", borderRadius: "24px" }}
@@ -607,72 +711,7 @@ export function ResourcesPage() {
                     </div>
                   </div>
                 </div>
-                <div className="flex gap-4 print:hidden" style={{ flex: "0 0 auto", marginLeft: "auto", columnGap: "16px" }}>
-                  <button
-                    type="button"
-                    onClick={handleExport}
-                    onMouseEnter={(event) => {
-                      event.currentTarget.style.backgroundColor = exportHoverColor;
-                    }}
-                    onMouseLeave={(event) => {
-                      event.currentTarget.style.backgroundColor = exportBaseColor;
-                    }}
-                    onFocus={(event) => {
-                      event.currentTarget.style.backgroundColor = exportHoverColor;
-                    }}
-                    onBlur={(event) => {
-                      event.currentTarget.style.backgroundColor = exportBaseColor;
-                    }}
-                    style={{
-                      backgroundColor: exportBaseColor,
-                      color: "#ffffff",
-                      borderRadius: "999px",
-                      padding: "8px 18px",
-                      fontSize: "11px",
-                      fontWeight: 700,
-                      letterSpacing: "0.08em",
-                      textTransform: "uppercase",
-                      height: "34px",
-                      lineHeight: "1",
-                      boxShadow: "0 6px 14px rgba(79, 70, 229, 0.25)",
-                    }}
-                    className="inline-flex items-center gap-2 transition"
-                  >
-                    <Printer className="h-4 w-4" /> Export Report
-                  </button>
-                  <button
-                    onClick={clearAll}
-                    onMouseEnter={(event) => {
-                      event.currentTarget.style.backgroundColor = clearHoverColor;
-                    }}
-                    onMouseLeave={(event) => {
-                      event.currentTarget.style.backgroundColor = clearBaseColor;
-                    }}
-                    onFocus={(event) => {
-                      event.currentTarget.style.backgroundColor = clearHoverColor;
-                    }}
-                    onBlur={(event) => {
-                      event.currentTarget.style.backgroundColor = clearBaseColor;
-                    }}
-                    style={{
-                      backgroundColor: clearBaseColor,
-                      color: "#ffffff",
-                      borderRadius: "999px",
-                      padding: "8px 16px",
-                      fontSize: "11px",
-                      fontWeight: 700,
-                      letterSpacing: "0.08em",
-                      textTransform: "uppercase",
-                      height: "34px",
-                      lineHeight: "1",
-                      border: "1px solid rgba(255, 255, 255, 0.08)",
-                      boxShadow: "0 6px 14px rgba(15, 23, 42, 0.2)",
-                    }}
-                    className="inline-flex items-center gap-2 transition"
-                  >
-                    <RotateCcw className="h-4 w-4" /> Clear
-                  </button>
-                </div>
+                <div className="flex gap-4 print:hidden" style={{ flex: "0 0 auto", marginLeft: "auto", columnGap: "16px" }} />
               </div>
             </div>
 
@@ -824,9 +863,32 @@ export function ResourcesPage() {
             <section
               key={section.id}
               className="bg-white shadow-sm overflow-hidden"
-              style={{ borderRadius: "18px", border: "1px solid #eef2f7", fontFamily: '"Poppins", "Segoe UI", sans-serif' }}
+              style={{ borderRadius: "18px", border: "1px solid #eef2f7", fontFamily: '"Poppins", "Segoe UI", sans-serif', position: "relative" }}
             >
               <div className="px-6 pt-6 pb-4">
+                {(() => {
+                  const isOpen = Boolean(openGuidance[section.id]);
+                  return (
+                    <button
+                      type="button"
+                      onClick={() => toggleGuidance(section.id)}
+                      className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-[10px] font-semibold uppercase"
+                      style={{
+                        backgroundColor: "#f3f6fb",
+                        color: "#7b8798",
+                        letterSpacing: "0.18em",
+                        border: "1px solid #e7edf5",
+                        position: "absolute",
+                        top: "16px",
+                        right: "16px",
+                        zIndex: 2,
+                      }}
+                    >
+                      <Info className="h-4 w-4" style={{ color: "#94a3b8" }} />
+                      {isOpen ? "Hide Clinical Guidance" : "View Clinical Guidance"}
+                    </button>
+                  );
+                })()}
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                   <div className="flex items-start gap-3">
                     <div
@@ -864,27 +926,6 @@ export function ResourcesPage() {
                         {section.id === "reviews" ? "CQC Regulation 17 (Good Governance)" : section.cqc}
                       </p>
                     </div>
-                  </div>
-                  <div>
-                    {(() => {
-                      const isOpen = Boolean(openGuidance[section.id]);
-                      return (
-                    <button
-                      type="button"
-                      onClick={() => toggleGuidance(section.id)}
-                      className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-[10px] font-semibold uppercase"
-                      style={{
-                        backgroundColor: "#f3f6fb",
-                        color: "#7b8798",
-                        letterSpacing: "0.18em",
-                        border: "1px solid #e7edf5",
-                      }}
-                    >
-                      <Info className="h-4 w-4" style={{ color: "#94a3b8" }} />
-                      {isOpen ? "Hide Clinical Guidance" : "View Clinical Guidance"}
-                    </button>
-                      );
-                    })()}
                   </div>
                 </div>
                 {openGuidance[section.id] && (
@@ -1016,18 +1057,58 @@ export function ResourcesPage() {
                 </div>
               </div>
               <div className="px-6 pt-6 pb-5" style={{ borderTop: "1px solid #eef2f7", marginTop: "16px" }}>
-                <div
-                  className="flex items-center gap-2 text-[10px] font-semibold uppercase"
-                  style={{ color: "#8f9bb0", letterSpacing: "0.22em" }}
-                >
-                  <FileText className="h-4 w-4" />
-                  Auditor Comments & Evidence Observed
+                <div className="flex items-center justify-between gap-3">
+                  <div
+                    className="flex items-center gap-2 text-[10px] font-semibold uppercase"
+                    style={{ color: "#8f9bb0", letterSpacing: "0.22em" }}
+                  >
+                    <FileText className="h-4 w-4" />
+                    Auditor Comments & Evidence Observed
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => clearSection(section.id)}
+                    onMouseEnter={(event) => {
+                      event.currentTarget.style.backgroundColor = clearHoverColor;
+                    }}
+                    onMouseLeave={(event) => {
+                      event.currentTarget.style.backgroundColor = clearBaseColor;
+                    }}
+                    onFocus={(event) => {
+                      event.currentTarget.style.backgroundColor = clearHoverColor;
+                    }}
+                    onBlur={(event) => {
+                      event.currentTarget.style.backgroundColor = clearBaseColor;
+                    }}
+                    style={{
+                      backgroundColor: clearBaseColor,
+                      color: "#ffffff",
+                      borderRadius: "999px",
+                      padding: "6px 14px",
+                      fontSize: "10px",
+                      fontWeight: 700,
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                      height: "30px",
+                      lineHeight: "1",
+                      border: "1px solid rgba(255, 255, 255, 0.08)",
+                      boxShadow: "0 6px 14px rgba(15, 23, 42, 0.2)",
+                      flex: "0 0 auto",
+                    }}
+                    className="inline-flex items-center gap-2 transition"
+                  >
+                    <RotateCcw className="h-4 w-4" /> Clear
+                  </button>
                 </div>
                 <textarea
                   rows={3}
                   className="mt-4 w-full rounded-2xl border px-5 py-4 text-sm shadow-sm outline-none ring-0 transition focus:ring-2"
                   style={{ borderColor: "#e5edf5", color: "#475569" }}
                   placeholder="e.g. 'Observed MUST score of 3 but no referral made to dietician...'"
+                  value={comments[section.id] ?? ""}
+                  onChange={(event) =>
+                    setComments((prev) => ({ ...prev, [section.id]: event.target.value }))
+                  }
                 />
               </div>
             </section>
@@ -1049,22 +1130,57 @@ export function ResourcesPage() {
                 padding: "18px 24px 12px",
                 display: "flex",
                 alignItems: "center",
-                gap: "10px",
+                justifyContent: "space-between",
+                gap: "16px",
               }}
             >
-              <ClipboardCheck className="h-5 w-5" style={{ color: "#F23D60" }} />
-              <h2
-                style={{
-                  margin: 0,
-                  color: "#FFFFFF",
-                  fontSize: "16px",
-                  fontWeight: 800,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.04em",
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <ClipboardCheck className="h-5 w-5" style={{ color: "#F23D60" }} />
+                <h2
+                  style={{
+                    margin: 0,
+                    color: "#FFFFFF",
+                    fontSize: "16px",
+                    fontWeight: 800,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.04em",
+                  }}
+                >
+                  Smart Action Plan
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={handleExport}
+                onMouseEnter={(event) => {
+                  event.currentTarget.style.backgroundColor = exportHoverColor;
                 }}
+                onMouseLeave={(event) => {
+                  event.currentTarget.style.backgroundColor = exportBaseColor;
+                }}
+                onFocus={(event) => {
+                  event.currentTarget.style.backgroundColor = exportHoverColor;
+                }}
+                onBlur={(event) => {
+                  event.currentTarget.style.backgroundColor = exportBaseColor;
+                }}
+                style={{
+                  backgroundColor: exportBaseColor,
+                  color: "#ffffff",
+                  borderRadius: "999px",
+                  padding: "8px 18px",
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  height: "34px",
+                  lineHeight: "1",
+                  boxShadow: "0 6px 14px rgba(79, 70, 229, 0.25)",
+                }}
+                className="inline-flex items-center gap-2 transition print:hidden"
               >
-                Smart Action Plan
-              </h2>
+                <Printer className="h-4 w-4" /> Export Report
+              </button>
             </div>
             <div style={{ backgroundColor: "#0F1729", padding: "0 24px 24px" }}>
               <div
@@ -1182,6 +1298,166 @@ export function ResourcesPage() {
             </div>
           </section>
         </div>
+        {accessState !== "allowed" && (
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "24px",
+              backgroundColor: "rgba(15, 23, 42, 0.55)",
+              zIndex: 5,
+            }}
+          >
+            <div
+              style={{
+                width: "min(520px, 100%)",
+                backgroundColor: "#ffffff",
+                borderRadius: "18px",
+                padding: "24px",
+                border: "1px solid #e2e8f0",
+                boxShadow: "0 24px 60px rgba(15, 23, 42, 0.25)",
+              }}
+            >
+              <h2 style={{ margin: 0, fontSize: "20px", fontWeight: 800, color: "#0f172a" }}>
+                Resource Access
+              </h2>
+              <p style={{ margin: "6px 0 16px", color: "#475569" }}>
+                Sign in to view the resources audit toolkit.
+              </p>
+
+              {accessState === "checking" && (
+                <div style={{ color: "#475569", fontSize: "14px" }}>Checking access...</div>
+              )}
+
+              {accessState === "error" && (
+                <div style={{ color: "#b91c1c", fontSize: "14px" }}>
+                  {accessMessage ?? "Access verification failed."}
+                </div>
+              )}
+
+              {accessState === "signed-out" && (
+                <form onSubmit={handleEmailSignIn} style={{ display: "grid", gap: "12px" }}>
+                  <div style={{ display: "grid", gap: "6px" }}>
+                    <label style={{ fontSize: "12px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#64748b" }}>
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={emailInput}
+                      onChange={(event) => setEmailInput(event.target.value)}
+                      style={{
+                        borderRadius: "12px",
+                        border: "1px solid #e2e8f0",
+                        padding: "12px 14px",
+                        fontSize: "14px",
+                        fontWeight: 600,
+                        color: "#0f172a",
+                        backgroundColor: "#ffffff",
+                      }}
+                    />
+                  </div>
+                  <div style={{ display: "grid", gap: "6px" }}>
+                    <label style={{ fontSize: "12px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#64748b" }}>
+                      Password
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      value={passwordInput}
+                      onChange={(event) => setPasswordInput(event.target.value)}
+                      style={{
+                        borderRadius: "12px",
+                        border: "1px solid #e2e8f0",
+                        padding: "12px 14px",
+                        fontSize: "14px",
+                        fontWeight: 600,
+                        color: "#0f172a",
+                        backgroundColor: "#ffffff",
+                      }}
+                    />
+                  </div>
+                  {accessMessage && (
+                    <div style={{ color: "#b91c1c", fontSize: "13px" }}>{accessMessage}</div>
+                  )}
+                  <button
+                    type="submit"
+                    disabled={signingIn}
+                    style={{
+                      backgroundColor: "#0f172a",
+                      color: "#ffffff",
+                      borderRadius: "999px",
+                      padding: "10px 18px",
+                      fontSize: "12px",
+                      fontWeight: 700,
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                      border: "none",
+                      cursor: signingIn ? "not-allowed" : "pointer",
+                    }}
+                  >
+                    {signingIn ? "Signing in..." : "Sign In"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleGoogleSignIn}
+                    disabled={signingIn}
+                    style={{
+                      backgroundColor: "#f8fafc",
+                      color: "#0f172a",
+                      borderRadius: "999px",
+                      padding: "10px 18px",
+                      fontSize: "12px",
+                      fontWeight: 700,
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                      border: "1px solid #e2e8f0",
+                      cursor: signingIn ? "not-allowed" : "pointer",
+                    }}
+                  >
+                    Continue with Google
+                  </button>
+                </form>
+              )}
+
+              {accessState === "denied" && (
+                <div style={{ display: "grid", gap: "10px" }}>
+                  <div style={{ color: "#b91c1c", fontSize: "14px", fontWeight: 700 }}>
+                    Access denied.
+                  </div>
+                  <div style={{ color: "#475569", fontSize: "13px" }}>
+                    Your account does not have permission to view this page. Contact support to request access.
+                  </div>
+                  {user?.email && (
+                    <div style={{ color: "#64748b", fontSize: "12px" }}>Signed in as {user.email}</div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={signOut}
+                    style={{
+                      backgroundColor: "#0f172a",
+                      color: "#ffffff",
+                      borderRadius: "999px",
+                      padding: "10px 18px",
+                      fontSize: "12px",
+                      fontWeight: 700,
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                      border: "none",
+                      cursor: "pointer",
+                      justifySelf: "start",
+                    }}
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   </div>

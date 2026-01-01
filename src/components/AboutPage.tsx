@@ -84,7 +84,6 @@ export function AboutPage() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
             >
-              <h2 className="mb-6">Our Story</h2>
               <div className="space-y-4 text-muted-foreground">
                 <p>
                   <strong className="text-foreground">Coach4Improvement (C4i) Care Consultancy</strong> is a leading Health and Social Care Consultancy specialising in offering personalised Health and Social Care Regulatory Improvement and compliance services tailored to each client and their needs.
@@ -105,20 +104,106 @@ export function AboutPage() {
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="relative"
             >
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 auto-rows-[180px] md:auto-rows-[220px]">
-                <div className="relative rounded-2xl shadow-xl border border-slate-100 bg-white overflow-hidden md:col-span-2 md:row-span-2">
-                  <img src={About2} alt="Coach4Improvement collage 2" className="w-full h-full object-cover" loading="lazy" />
+              <style>
+                {`
+                  .about-collage {
+                    position: relative;
+                    width: 100%;
+                    max-width: 560px;
+                    height: 520px;
+                    margin: 0 auto;
+                  }
+                  .about-collage-item {
+                    position: absolute;
+                    overflow: hidden;
+                    border-radius: 18px;
+                    border: 1px solid #e2e8f0;
+                    background: #ffffff;
+                    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+                  }
+                  .about-collage-item img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    display: block;
+                  }
+                  .about-collage-item.item-a {
+                    top: 0;
+                    left: 0;
+                    width: 62%;
+                    height: 60%;
+                  }
+                  .about-collage-item.item-b {
+                    top: 6%;
+                    right: 0;
+                    width: 44%;
+                    height: 40%;
+                    transform: rotate(1deg);
+                  }
+                  .about-collage-item.item-c {
+                    bottom: 0;
+                    left: 6%;
+                    width: 40%;
+                    height: 36%;
+                    transform: rotate(-1deg);
+                  }
+                  .about-collage-item.item-d {
+                    bottom: 4%;
+                    right: 0;
+                    width: 52%;
+                    height: 44%;
+                  }
+                  @media (max-width: 1024px) {
+                    .about-collage {
+                      height: 460px;
+                    }
+                  }
+                  @media (max-width: 768px) {
+                    .about-collage {
+                      height: 380px;
+                    }
+                    .about-collage-item.item-a {
+                      width: 64%;
+                      height: 58%;
+                    }
+                    .about-collage-item.item-b {
+                      width: 42%;
+                      height: 38%;
+                      top: 4%;
+                    }
+                    .about-collage-item.item-c {
+                      width: 44%;
+                      height: 34%;
+                    }
+                    .about-collage-item.item-d {
+                      width: 56%;
+                      height: 40%;
+                      bottom: 4%;
+                    }
+                  }
+                  @media (max-width: 480px) {
+                    .about-collage {
+                      height: 300px;
+                    }
+                    .about-collage-item {
+                      border-radius: 14px;
+                    }
+                  }
+                `}
+              </style>
+              <div className="about-collage">
+                <div className="about-collage-item item-a">
+                  <img src={About2} alt="Coach4Improvement collage 2" loading="lazy" />
                 </div>
-                <div className="relative rounded-2xl shadow-xl border border-slate-100 bg-white overflow-hidden md:col-span-2">
-                  <img src={About1} alt="Coach4Improvement collage 1" className="w-full h-full object-cover" loading="lazy" />
+                <div className="about-collage-item item-b">
+                  <img src={About1} alt="Coach4Improvement collage 1" loading="lazy" />
                 </div>
-                <div className="relative rounded-2xl shadow-xl border border-slate-100 bg-white overflow-hidden">
-                  <img src={About3} alt="Coach4Improvement collage 3" className="w-full h-full object-cover" loading="lazy" />
+                <div className="about-collage-item item-c">
+                  <img src={About3} alt="Coach4Improvement collage 3" loading="lazy" />
                 </div>
-                <div className="relative rounded-2xl shadow-xl border border-slate-100 bg-white overflow-hidden md:col-span-3">
-                  <img src={About4} alt="Coach4Improvement collage 4" className="w-full h-full object-cover" loading="lazy" />
+                <div className="about-collage-item item-d">
+                  <img src={About4} alt="Coach4Improvement collage 4" loading="lazy" />
                 </div>
               </div>
             </motion.div>
@@ -127,10 +212,10 @@ export function AboutPage() {
       </section>
 
       {/* Mission Section */}
-      <section className="py-16 bg-accent">
+      <section className="py-16 bg-accent text-foreground">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="mb-6 text-white">Our Mission</h2>
-          <p className="text-xl text-white/90 max-w-3xl mx-auto mb-12">
+          <h2 className="mb-6">Our Mission</h2>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-12">
             We help you assess your current Health and Social Care Act (2014) regulatory performance and develop and deliver improvement plans to help your services be safe, effective, caring, responsive and well-led.
           </p>
 
@@ -149,14 +234,14 @@ export function AboutPage() {
                       <value.icon className="w-8 h-8 text-primary" />
                     </div>
                     <h4 className="mb-2">{value.title}</h4>
-                    <p className="text-sm text-muted-foreground">{value.description}</p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+                  <p className="text-sm text-muted-foreground">{value.description}</p>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  </section>
 
       {/* Expertise Section */}
       <section className="py-16 md:py-24">

@@ -194,30 +194,25 @@ export function HomePage({ onNavigate, onOpenBooking }: HomePageProps) {
       </section>
 
       {/* Partners/Trust Section */}
-      <section className="py-12 bg-accent">
+      <section className="py-12 bg-accent text-foreground">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-12">
-            {partners.map((partner, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="flex flex-col items-center text-center"
-              >
-                <partner.icon className="w-12 h-12 text-primary mb-2" />
-                <p className="text-sm text-white">{partner.name}</p>
-              </motion.div>
-            ))}
-          </div>
-          {/* Internal links for SEO */}
-          <div className="mt-8 flex gap-4">
-            <Link to="/services" className="underline text-white">Explore our CQC services</Link>
-            <Link to="/contact" className="underline text-white">Contact our consultants</Link>
-          </div>
+          {partners.map((partner, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1 }}
+              className="flex flex-col items-center text-center"
+            >
+              <partner.icon className="w-12 h-12 text-primary mb-2" />
+              <p className="text-sm">{partner.name}</p>
+            </motion.div>
+          ))}
         </div>
-      </section>
+      </div>
+    </section>
 
       {/* Services Section */}
       <section id="services-section" className="py-16 md:py-24">

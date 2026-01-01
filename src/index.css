@@ -2494,9 +2494,9 @@
   --secondary-foreground: #fff;
   --muted: #f5f5f5;
   --muted-foreground: #666;
-  /* Lighter yellow accent for better UI balance */
-  --accent: #F6D365;
-  --accent-foreground: #1a1a1a; /* dark text for contrast on yellow */
+  /* Soft periwinkle accent for a calmer, complementary tone */
+  --accent: #E4ECFF;
+  --accent-foreground: #1f2a3a;
   --destructive: #d4183d;
   --destructive-foreground: #fff;
   --border: #0000001a;
@@ -2508,7 +2508,7 @@
   --ring: #00c3ca;
   --chart-1: #00c3ca;
   --chart-2: #8c52ff;
-  --chart-3: #F6D365;
+  --chart-3: #7EA6FF;
   --chart-4: #6fd8dd;
   --chart-5: #b297ff;
   --radius: .75rem;
