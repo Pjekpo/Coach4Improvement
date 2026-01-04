@@ -10,7 +10,6 @@ import { Footer } from "./components/Footer";
 import { HomePage } from "./components/HomePage";
 import { AboutPage } from "./components/AboutPage";
 import { ServicesPage } from "./components/ServicesPage";
-import { PackagesPage } from "./components/PackagesPage";
 import { ContactPage } from "./components/ContactPage";
 import { PrivacyPolicyPage } from "./components/PrivacyPolicyPage";
 import { TermsOfServicePage } from "./components/TermsOfServicePage";
@@ -28,7 +27,6 @@ function RoutedApp() {
       home: "/",
       about: "/about",
       services: "/services",
-      packages: "/packages",
       resources: "/resources",
       contact: "/contact",
     };
@@ -46,7 +44,6 @@ function RoutedApp() {
           <Route path="/" element={<HomePage onNavigate={handleNavigate} onOpenBooking={() => navigate('/booking')} />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/services" element={<ServicesPage onOpenBooking={() => navigate('/booking')} />} />
-          <Route path="/packages" element={<PackagesPage onOpenBooking={() => navigate('/booking')} />} />
           <Route path="/resources" element={<ResourcesPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />

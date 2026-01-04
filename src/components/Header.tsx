@@ -28,7 +28,6 @@ export function Header() {
     { name: "Home", to: "/" },
     { name: "About Us", to: "/about" },
     { name: "Services", to: "/services" },
-    { name: "Packages", to: "/packages" },
     { name: "Resources", to: "/resources" },
     { name: "Contact", to: "/contact" },
   ];

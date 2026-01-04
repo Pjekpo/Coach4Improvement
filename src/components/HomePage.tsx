@@ -348,14 +348,6 @@ export function HomePage({ onNavigate, onOpenBooking }: HomePageProps) {
             >
               Book Consultation
             </Button>
-            <Button
-              size="lg"
-              onClick={() => handleNavigate("packages")}
-              variant="outline"
-              className="border-white text-white bg-transparent hover:bg-white/10 hover:text-white"
-            >
-              View Packages
-            </Button>
           </div>
         </div>
       </section>
