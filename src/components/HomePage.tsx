@@ -172,6 +172,17 @@ export function HomePage({ onNavigate, onOpenBooking }: HomePageProps) {
                   When challenges occur, we leverage our social work background to provide expert, independent support, including conducting <strong>safeguarding and whistleblowing investigations</strong> and drafting detailed, professional responses to regulators such as CQC, CIW, and Ofsted. Furthermore, our <strong>crisis turnaround package</strong> offers detailed root-cause analysis after poor ratings or critical incidents, working directly with Registered Managers and Providers to embed and sustain lasting positive change. We support you to focus on people who receive care and their outcomes; it is not just about compliance with regulations.
                 </p>
               </div>
+              <div className="flex flex-col gap-3">
+                <p className="text-white/90 text-sm font-semibold">
+                  Looking for the Care Plan Audit Tool?
+                </p>
+                <Link
+                  to="/resources"
+                  className="cta-pop"
+                >
+                  Explore the Care Plan Audit Tool
+                </Link>
+              </div>
               {/* Removed hero action buttons as requested */}
             </motion.div>
 
