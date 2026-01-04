@@ -101,7 +101,7 @@ const AUDIT_SECTIONS: {
     expectedStandard: "Reviews that tell the story of the month and show responsive changes or active clinical oversight.",
     items: [
       "Do monthly reviews provide a meaningful appraisal (medical visits, illnesses) rather than 'No Change' entries?",
-      "Is there evidence that staff are repeatedly using 'No change, No change' in documentation?",
+      "Are staff fully acknowledging changes in people's needs and not using 'No change or care plan remains the same' narrative?",
       "If 'No change' entries are present, have you spoken to the staff member and provided coaching/reflection?",
       "Is there evidence that risk assessments have been updated following significant events (falls, hospital admissions)?",
       "Does the review explicitly state if planned actions have been met?",
@@ -191,10 +191,10 @@ const AUDIT_SECTIONS: {
       "A plan that allows staff to act immediately during a hypo and monitors glucose within specific clinical ranges.",
     items: [
       "Diagnosis Detail: Does the care plan clearly specify if the resident has Type 1 or Type 2 Diabetes?",
-      "Blood Glucose Monitoring: Are there clear 'Target Ranges' specified by a clinician?",
+      "Blood Glucose Monitoring: Are there clear 'Target Ranges' specified by a clinician, with guidance on ketones and responding to hyperglycemia and hypoglycemia?",
       "Insulin Management: If on insulin, does the plan specify the type and site rotation?",
       "Emergency Action Plan: Is there a 'Hypo Rescue Plan' detailing exactly what to give?",
-      "Foot Care: Is there a specific Diabetes Foot Risk Assessment documented?",
+      "Are diabetes annual checks such as Foot Care, eye sight checks and HB1ac checks documented?",
     ],
   },
   {
@@ -233,7 +233,7 @@ const AUDIT_SECTIONS: {
     items: [
       "Is there a person-specific Epilepsy Care Plan describing unique seizure types?",
       "Does the plan identify known 'Triggers'?",
-      "Is there a clear 'Step-by-Step' First Aid guide for staff to follow?",
+      "Is there a clear 'Step-by-Step' First Aid guide for staff to follow specifying when to call 999 or emergency services?",
       "Is there an 'Emergency Protocol' (Rescue Meds) specified?",
     ],
   },
@@ -254,7 +254,7 @@ const AUDIT_SECTIONS: {
     items: [
       "Does the plan reflect the person's 'Homely' choices and personality in the environment?",
       "Is there a specific 'Room Risk Assessment' identifying hazards/safety checks?",
-      "Are window restrictors and radiator covers documented as checked?",
+      "Are window restrictors and radiator covers documented as checked, and is there guidance on checking falls sensors (where one is provided) and pressure mattresses?",
       "Does the environment plan reflect specific sensory needs (lighting, noise)?",
     ],
   },
@@ -274,7 +274,8 @@ const AUDIT_SECTIONS: {
       "Clear documentation of who makes decisions and evidence of the least restrictive option.",
     items: [
       "Is there evidence of a capacity assessment for specific complex decisions?",
-      "Are 'Best Interest Decisions' documented and involve family/advocates?",
+      "Does the MCA Functional Assessment section clearly show what question the person was given and what their actual response was? Does it demonstrate support provided to help them understand and retain information relating to the decision?",
+      "Are 'Best Interest Decisions' documented and involve family/advocates? Are actual names of people consulted or involved included (not just family or professionals)?",
       "If the person is deprived of their liberty, is a valid DoLS/LPS authorization in place?",
       "Is there a record of 'Lasting Power of Attorney' (Health & Welfare)?",
     ],
@@ -314,10 +315,10 @@ const AUDIT_SECTIONS: {
     expectedStandard:
       "Detailed IDDSI guidance and clear evidence that staff act when targets are not met.",
     items: [
-      "Is there a clear 'Daily Fluid Target' documented (e.g., 1600ml)?",
+      "Is there a clear 'Daily Fluid Target' documented (e.g., 1600ml), and are fluid/food charts totaled and analyzed for trends daily?",
       "Are food preferences, allergies, and intolerances highlighted?",
       "Does the plan specify required food textures (IDDSI levels)?",
-      "Are fluid/food charts being totaled and analyzed for trends daily?",
+      "If there has been evidence of weight loss, does the care plan demonstrate evidence of referral to dieticians or GP?",
     ],
   },
   {
@@ -374,10 +375,11 @@ const AUDIT_SECTIONS: {
     ],
     expectedStandard: "Clear step-by-step instructions for site care and emergency contact numbers.",
     items: [
-      "Is there a PEG-specific Risk Assessment in place?",
+      "Is there a PEG-specific Risk Assessment in place, this should include infection, blockages, overgranulation, and dislodgement?",
       "Does the plan specify the tube type, size, and insertion date?",
-      "Is there guidance on daily stoma site care?",
-      "Is there an 'Emergency Protocol' in place for a displaced tube?",
+      "Is there guidance on daily stoma site care and evidence that the maintenance is taking place? This includes rotation and advancing the tube?",
+      "Is there specific oral hygiene guidance for people with a PEG tube, including mouth care, brushing, and moisturising to prevent dental issues and promote overall oral health?",
+      "Is there an 'Emergency Protocol' in place for a displaced tube? Are contact details for specialist professionals available in the care plan?",
     ],
   },
   {
@@ -462,10 +464,10 @@ const AUDIT_SECTIONS: {
       "A comprehensive wound record that shows the 'journey' of the wound with visual evidence.",
     items: [
       "Is there a current Waterlow or Braden risk assessment score recorded?",
-      "Does the care plan specify the frequency of repositioning?",
+      "Does the care plan specify the frequency of repositioning and is there evidence that this is being followed - check the repositioning chart.",
       "Are specific pressure-relieving items (mattresses/cushions) named and set correctly?",
       "Is there a 'Body Map' in use for daily skin checks?",
-      "Wound Care Plans: Are they fully completed with measurements and photos?",
+      "Wound Care Plans: Are they fully completed with wound development history, wound measurements, wound treatment offered at each review and photos?",
     ],
   },
   {
@@ -491,6 +493,11 @@ const AUDIT_SECTIONS: {
       "Are medical risks and emergency communication (call bell position/accessibility) clearly documented for night staff?",
     ],
   },
+];
+
+const PERSONAL_INFO_CRITERIA = [
+  "Front section contains details such as family and friends important to the person that they wish to stay in contact with.",
+  "Basic summary provides information about the person's life, background, and interests. Where possible this should be based on information provided by the person, but also include information from relatives or representatives where appropriate.",
 ];
 
 function Icon({ name, className }: { name: IconName; className?: string }) {
@@ -896,6 +903,103 @@ export function ResourcesPage() {
             >
               Note: If a section is marked ‘No’, a corresponding SMART action will be generated automatically at the end of this report.
             </p>
+            <div
+              style={{
+                fontSize: "18px",
+                fontWeight: 700,
+                color: "#1e2b3a",
+                borderBottom: "2px solid #cbd5e1",
+                paddingBottom: "4px",
+                display: "inline-block",
+              }}
+            >
+              Personal Information
+            </div>
+            <div
+              className="mt-6 text-[10px] font-semibold uppercase"
+              style={{
+                color: "#8f9bb0",
+                letterSpacing: "0.24em",
+                borderBottom: "1px solid #f1f5f9",
+                paddingBottom: "10px",
+                display: "grid",
+                gridTemplateColumns: "minmax(0, 1fr) 52px 52px 52px",
+                alignItems: "center",
+              }}
+            >
+              <span>Criteria</span>
+              <span style={{ textAlign: "center" }}>Met</span>
+              <span style={{ textAlign: "center" }}>No</span>
+              <span style={{ textAlign: "center" }}>N/A</span>
+            </div>
+            <div style={{ borderTop: "1px solid #eef2f7" }}>
+              <div className="divide-y" style={{ borderColor: "#f1f5f9" }}>
+                {PERSONAL_INFO_CRITERIA.map((item, i) => {
+                  const key = `personal-info-${i}`;
+                  const state = scores[key];
+                  return (
+                    <div
+                      key={key}
+                      className="py-4"
+                      style={{
+                        backgroundColor: i % 2 === 0 ? "#f8fafc" : "#ffffff",
+                        display: "grid",
+                        gridTemplateColumns: "minmax(0, 1fr) 52px 52px 52px",
+                        alignItems: "center",
+                        paddingLeft: "12px",
+                        paddingRight: "12px",
+                      }}
+                    >
+                      <p className="text-[14px] font-semibold leading-relaxed" style={{ color: "#2f3b52", margin: 0 }}>
+                        {item}
+                      </p>
+                      {(["yes", "no", "na"] as AuditScore[]).map((val) => {
+                        const isActive = state === val;
+                        const baseClass = "h-8 w-8 rounded-full border flex items-center justify-center transition-colors";
+                        const textColor = isActive
+                          ? val === "yes"
+                            ? "#16a34a"
+                            : val === "no"
+                            ? "#e11d48"
+                            : "#94a3b8"
+                          : "#e6edf6";
+                        const borderColor = isActive
+                          ? val === "yes"
+                            ? "#c7ead7"
+                            : val === "no"
+                            ? "#f6c9d3"
+                            : "#e2e8f0"
+                          : "#e6edf6";
+                        const bgColor = isActive
+                          ? val === "yes"
+                            ? "#f0fdf4"
+                            : val === "no"
+                            ? "#fff1f2"
+                            : "#f8fafc"
+                          : "#ffffff";
+                        return (
+                          <div key={val} style={{ display: "flex", justifyContent: "center" }}>
+                            <button
+                              onClick={() => handleScore(key, val)}
+                              className={baseClass}
+                              style={{ borderColor, backgroundColor: bgColor, color: textColor }}
+                            >
+                              {val === "yes" ? (
+                                <Check className="h-4 w-4" />
+                              ) : val === "no" ? (
+                                <X className="h-4 w-4" />
+                              ) : (
+                                <Minus className="h-4 w-4" />
+                              )}
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </section>
 
