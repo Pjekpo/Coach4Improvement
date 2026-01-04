@@ -1,4 +1,5 @@
 import { Phone, Mail, MapPin, MessageCircle } from "lucide-react";
+import { Link } from "react-router-dom";
 import LogoImage from "../assets/asset-1.png"; // NOTE: ensure filename matches src/assets/asset-1.png
 
 export function Footer() {
@@ -63,6 +64,15 @@ export function Footer() {
         {/* Bottom bar */}
         <div className="border-t border-white/20 mt-8 pt-8 text-center text-sm text-white/80">
           <p>© 2025 Coach4Improvement (C4i) Care Consultancy. All rights reserved.</p>
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-3">
+            <Link to="/privacy-policy" className="hover:text-white transition-colors">
+              Privacy Policy
+            </Link>
+            <span className="text-white/50">|</span>
+            <Link to="/terms-of-service" className="hover:text-white transition-colors">
+              Terms of Service
+            </Link>
+          </div>
           <p className="mt-2">
            Developed by{' Praise Ekpo'}
           </p>

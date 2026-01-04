@@ -12,6 +12,8 @@ import { AboutPage } from "./components/AboutPage";
 import { ServicesPage } from "./components/ServicesPage";
 import { PackagesPage } from "./components/PackagesPage";
 import { ContactPage } from "./components/ContactPage";
+import { PrivacyPolicyPage } from "./components/PrivacyPolicyPage";
+import { TermsOfServicePage } from "./components/TermsOfServicePage";
 import ResourcesPage from "./components/ResourcesPage";
 import { BookingModal } from "./components/BookingModal";
 import { Toaster } from "./components/ui/sonner";
@@ -47,6 +49,8 @@ function RoutedApp() {
           <Route path="/packages" element={<PackagesPage onOpenBooking={() => navigate('/booking')} />} />
           <Route path="/resources" element={<ResourcesPage />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+          <Route path="/terms-of-service" element={<TermsOfServicePage />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/booking" element={<BookingPage />} />
         </Routes>

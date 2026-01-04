@@ -285,7 +285,11 @@ export function ContactPage() {
                     )}
 
                     <p className="text-xs text-muted-foreground text-center">
-                      By submitting this form, you agree to our privacy policy. Your data is protected and will only be used to respond to your inquiry.
+                      By submitting this form, you agree to our{" "}
+                      <Link to="/privacy-policy" className="underline underline-offset-2 hover:text-foreground">
+                        privacy policy
+                      </Link>
+                      . Your data is protected and will only be used to respond to your inquiry.
                     </p>
                   </form>
                 </CardContent>
