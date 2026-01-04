@@ -33,6 +33,7 @@ export default function BookingPage() {
   const [serviceNeed, setServiceNeed] = useState('');
   const [notes, setNotes] = useState('');
   const { user, session } = useAuth();
+  const isSignedIn = !!user;
   const [unavailableDates, setUnavailableDates] = useState<Set<string>>(new Set());
   const [bookedSlots, setBookedSlots] = useState<SlotMap>({});
   const supabaseReady = supabaseConfigured && !!supabase;
@@ -237,13 +238,24 @@ export default function BookingPage() {
       <BookingGate onBlocked={() => {}}>
         {({ canBook, requestBook, emailVerified }) => (
           <div className="w-full max-w-2xl space-y-4">
-            {!emailVerified && (
+            {isSignedIn && !emailVerified && (
               <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-center text-sm">
                 Please verify your email to proceed with booking.
               </div>
             )}
 
-            <div className="flex justify-center">
+            {!isSignedIn && (
+              <div className="rounded-md border border-slate-200 bg-white p-3 text-center text-sm">
+                Sign in or create an account to choose a date and enter your details.
+                <div className="mt-2 flex justify-center">
+                  <Button type="button" variant="outline" onClick={requestBook}>
+                    Sign in or create account
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            <div className={`flex justify-center ${!isSignedIn ? 'pointer-events-none opacity-60' : ''}`}>
               <DayPicker
                 mode="single"
                 selected={date}
@@ -256,7 +268,9 @@ export default function BookingPage() {
             </div>
 
             {date && (
-              <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm space-y-3">
+              <div
+                className={`rounded-xl border border-slate-200 bg-white p-4 shadow-sm space-y-3 ${!isSignedIn ? 'pointer-events-none opacity-60' : ''}`}
+              >
                 <h3 className="font-semibold text-slate-800">Choose a time</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {timeSlots.map((slot) => {
@@ -266,7 +280,7 @@ export default function BookingPage() {
                         key={slot}
                         type="button"
                         variant={timeSlot === slot ? 'default' : 'outline'}
-                        disabled={unavailable}
+                        disabled={unavailable || !isSignedIn}
                         className={timeSlot === slot ? '' : 'bg-white'}
                         onClick={() => setTimeSlot(slot)}
                       >
@@ -282,7 +296,9 @@ export default function BookingPage() {
               </div>
             )}
 
-            <div className="grid gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div
+              className={`grid gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm ${!isSignedIn ? 'pointer-events-none opacity-60' : ''}`}
+            >
               <div className="grid gap-2">
                 <Label htmlFor="fullName">Full name</Label>
                 <Input
@@ -290,6 +306,7 @@ export default function BookingPage() {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="Jane Doe"
+                  disabled={!isSignedIn}
                   required
                 />
               </div>
@@ -301,6 +318,7 @@ export default function BookingPage() {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="+44 7123 456 789"
+                  disabled={!isSignedIn}
                   required
                 />
               </div>
@@ -312,6 +330,7 @@ export default function BookingPage() {
                   value={serviceNeed}
                   onChange={(e) => setServiceNeed(e.target.value)}
                   placeholder="e.g. Compliance audit, governance review"
+                  disabled={!isSignedIn}
                   required
                 />
               </div>
@@ -324,6 +343,7 @@ export default function BookingPage() {
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Share anything we should know before the call."
                   rows={4}
+                  disabled={!isSignedIn}
                 />
               </div>
             </div>

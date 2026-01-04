@@ -6,10 +6,9 @@ type AuthContextType = {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signInWithGoogle: () => Promise<void>;
   signInWithEmailOtp: (email: string) => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<void>;
-  signUpWithEmail: (email: string, password: string) => Promise<void>;
+  signUpWithEmail: (email: string, password: string, displayName?: string) => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -54,23 +53,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const signInWithGoogle = useCallback(async () => {
-    const redirectTo = resolveRedirect();
-    if (!supabaseConfigured || !supabase) {
-      throw new Error('Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.');
-    }
-
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo,
-        scopes: 'openid email profile https://www.googleapis.com/auth/calendar.events',
-      },
-    });
-    if (error) throw error;
-    if (data?.url) window.location.assign(data.url);
-  }, []);
-
   const signInWithEmailOtp = useCallback(async (email: string) => {
     const redirectTo = resolveRedirect();
     if (!supabaseConfigured || !supabase) {
@@ -91,15 +73,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (error) throw error;
   }, []);
 
-  const signUpWithEmail = useCallback(async (email: string, password: string) => {
+  const signUpWithEmail = useCallback(async (email: string, password: string, displayName?: string) => {
     const redirectTo = resolveRedirect();
     if (!supabaseConfigured || !supabase) {
       throw new Error('Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.');
     }
+    const options: { emailRedirectTo?: string; data?: { display_name: string } } = {};
+    if (redirectTo) options.emailRedirectTo = redirectTo;
+    if (displayName) options.data = { display_name: displayName };
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: redirectTo ? { emailRedirectTo: redirectTo } : undefined,
+      options: Object.keys(options).length ? options : undefined,
     });
     if (error) throw error;
   }, []);
@@ -114,13 +99,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       user,
       session,
       loading,
-      signInWithGoogle,
       signInWithEmailOtp,
       signInWithEmail,
       signUpWithEmail,
       signOut,
     }),
-    [user, session, loading, signInWithGoogle, signInWithEmailOtp, signInWithEmail, signUpWithEmail, signOut]
+    [user, session, loading, signInWithEmailOtp, signInWithEmail, signUpWithEmail, signOut]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

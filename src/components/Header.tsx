@@ -14,6 +14,9 @@ export function Header() {
   const [authOpen, setAuthOpen] = useState(false);
   const { user, signOut } = useAuth();
   const isLoggedIn = Boolean(user);
+  const displayName = (user?.user_metadata as { display_name?: string } | undefined)?.display_name?.trim();
+  const userEmail = user?.email;
+  const welcomeName = displayName || userEmail;
 
   const avatar =
     (user?.user_metadata as any)?.avatar_url ||
@@ -83,7 +86,10 @@ export function Header() {
             ))}
           </nav>
 
-          <div className="hidden lg:flex items-center gap-2">
+          <div className="hidden lg:flex items-center gap-3">
+            {isLoggedIn && welcomeName && (
+              <span className="text-sm font-semibold text-muted-foreground">Welcome, {welcomeName}</span>
+            )}
             <Button
               onClick={async () => {
                 if (isLoggedIn) {
@@ -93,10 +99,10 @@ export function Header() {
                 setAuthOpen(true);
               }}
               size="lg"
-              variant={isLoggedIn ? "destructive" : "outline"}
-              className={`flex items-center gap-2 ${isLoggedIn ? "bg-red-600 text-white border-red-700 hover:bg-red-700" : ""}`}
+              variant="outline"
+              className="flex items-center gap-2"
             >
-              <span className="text-sm font-medium">{isLoggedIn ? "Log Out" : "Sign Up"}</span>
+              <span className="text-sm font-medium">{isLoggedIn ? "Sign Out" : "Sign Up"}</span>
             </Button>
           </div>
 
@@ -126,6 +132,9 @@ export function Header() {
                 {link.name}
               </NavLink>
             ))}
+            {isLoggedIn && welcomeName && (
+              <div className="px-4 py-2 text-sm font-semibold text-muted-foreground">Welcome, {welcomeName}</div>
+            )}
             <Button
               onClick={() => {
                 setMobileMenuOpen(false);
@@ -135,11 +144,11 @@ export function Header() {
                 }
                 setAuthOpen(true);
               }}
-              className={`w-full mt-4 flex items-center gap-2 ${isLoggedIn ? "bg-red-600 text-white hover:bg-red-700" : ""}`}
+              className="w-full mt-4 flex items-center gap-2"
               size="lg"
-              variant={isLoggedIn ? "destructive" : "outline"}
+              variant="outline"
             >
-              <span className="text-base font-medium">{isLoggedIn ? "Log Out" : "Sign Up"}</span>
+              <span className="text-base font-medium">{isLoggedIn ? "Sign Out" : "Sign Up"}</span>
             </Button>
           </nav>
         )}

@@ -507,7 +507,7 @@ export function ResourcesPage() {
   const [accessState, setAccessState] = useState<AccessState>("checking");
   const [accessMessage, setAccessMessage] = useState<string | null>(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const exportBaseColor = "#4F46E5";
   const exportHoverColor = "#4338ca";
   const clearBaseColor = "#303a4b";
@@ -646,9 +646,6 @@ export function ResourcesPage() {
           >
             <div style={{ textAlign: "center", color: "#f8fafc" }}>
               <div style={{ fontSize: "22px", fontWeight: 800, letterSpacing: "0.02em" }}>Access required</div>
-              <div style={{ fontSize: "14px", color: "#cbd5f5", marginTop: "6px" }}>
-                Sign up or sign in with an approved email to continue.
-              </div>
             </div>
 
             {accessState === "checking" && (
@@ -692,28 +689,6 @@ export function ResourcesPage() {
                 <div style={{ color: "#cbd5f5", fontSize: "13px" }}>
                   Your account does not have permission to view this page. Contact support to request access.
                 </div>
-                {user?.email && (
-                  <div style={{ color: "#cbd5f5", fontSize: "12px" }}>Signed in as {user.email}</div>
-                )}
-                <button
-                  type="button"
-                  onClick={signOut}
-                  style={{
-                    backgroundColor: "#0b1324",
-                    color: "#ffffff",
-                    borderRadius: "999px",
-                    padding: "10px 18px",
-                    fontSize: "12px",
-                    fontWeight: 700,
-                    letterSpacing: "0.08em",
-                    textTransform: "uppercase",
-                    border: "1px solid rgba(255, 255, 255, 0.12)",
-                    cursor: "pointer",
-                    justifySelf: "center",
-                  }}
-                >
-                  Sign Out
-                </button>
               </div>
             )}
 

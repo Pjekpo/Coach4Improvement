@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Mail, Lock, Chrome } from 'lucide-react';
+import { Mail, Lock, User } from 'lucide-react';
 import { useAuth } from '@/auth/AuthProvider';
 import { toast } from 'sonner@2.0.3';
 
@@ -18,12 +18,13 @@ export default function AuthModal({
   embedded = false,
   showClose = true,
 }: Props) {
-  const { signInWithGoogle, signInWithEmail, signUpWithEmail, user } = useAuth();
+  const { signInWithEmail, signUpWithEmail, user } = useAuth();
   const [tab, setTab] = useState<'login' | 'signup'>(defaultTab);
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [googleLoading, setGoogleLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   if (!open) return null;
@@ -37,7 +38,7 @@ export default function AuthModal({
     try {
       setSubmitting(true);
       if (tab === 'signup') {
-        await signUpWithEmail(email, password);
+        await signUpWithEmail(email, password, name.trim());
         // Attempt immediate sign-in so the header updates to Log Out after signup
         await signInWithEmail(email, password);
         toast.success('Account created and signed in.');
@@ -48,7 +49,12 @@ export default function AuthModal({
         onClose();
       }
     } catch (e) {
-      const msg = e instanceof Error ? e.message : 'Unable to process request';
+      const rawMsg = e instanceof Error ? e.message : 'Unable to process request';
+      const normalized = rawMsg.toLowerCase();
+      const msg =
+        normalized.includes('email not confirmed') || normalized.includes('email not verified')
+          ? 'Confirm your email'
+          : rawMsg;
       toast.error(msg);
     } finally {
       setSubmitting(false);
@@ -57,20 +63,10 @@ export default function AuthModal({
 
   const switchTab = (next: 'login' | 'signup') => {
     setTab(next);
+    setName('');
     setPassword('');
     setConfirmPassword('');
-  };
-
-  const onGoogle = async () => {
-    try {
-      setGoogleLoading(true);
-      await signInWithGoogle();
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : 'Could not start Google sign-in';
-      toast.error(msg);
-    } finally {
-      setGoogleLoading(false);
-    }
+    setShowPassword(false);
   };
 
   const emailNotVerified = !!user && !user.email_confirmed_at;
@@ -181,6 +177,9 @@ export default function AuthModal({
             color: #0f172a;
             box-sizing: border-box;
           }
+          .auth-embed-input--with-toggle {
+            padding-right: 44px;
+          }
           .auth-embed-input:focus {
             outline: none;
             border-color: #4f46e5;
@@ -192,6 +191,24 @@ export default function AuthModal({
             top: 50%;
             transform: translateY(-50%);
             color: #94a3b8;
+          }
+          .auth-embed-toggle {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: transparent;
+            color: #64748b;
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1;
+            padding: 4px;
+          }
+          .auth-embed-toggle:focus-visible {
+            outline: 2px solid rgba(79, 70, 229, 0.6);
+            outline-offset: 2px;
+            border-radius: 6px;
           }
           .auth-embed-actions {
             display: grid;
@@ -213,40 +230,6 @@ export default function AuthModal({
             background: #4338ca;
           }
           .auth-embed-primary:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-          }
-          .auth-embed-divider {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 11px;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            color: #94a3b8;
-          }
-          .auth-embed-divider::before,
-          .auth-embed-divider::after {
-            content: "";
-            flex: 1;
-            height: 1px;
-            background: #e2e8f0;
-          }
-          .auth-embed-secondary {
-            height: 42px;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-            background: #ffffff;
-            color: #0f172a;
-            font-weight: 600;
-            font-size: 13px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-          }
-          .auth-embed-secondary:disabled {
             opacity: 0.7;
             cursor: not-allowed;
           }
@@ -303,11 +286,27 @@ export default function AuthModal({
           </button>
         </div>
 
-        {emailNotVerified && (
-          <div className="auth-embed-alert">Email not verified. Please click the link sent to your email.</div>
-        )}
+        {emailNotVerified && <div className="auth-embed-alert">Confirm your email.</div>}
 
         <form className="auth-embed-form" onSubmit={onEmailSubmit}>
+          {tab === 'signup' && (
+            <label className="auth-embed-field">
+              <span className="auth-embed-label">Name</span>
+              <span className="auth-embed-input-wrap">
+                <User className="auth-embed-icon" size={16} />
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  placeholder="Your name"
+                  autoComplete="name"
+                  className="auth-embed-input"
+                />
+              </span>
+            </label>
+          )}
+
           <label className="auth-embed-field">
             <span className="auth-embed-label">Email address</span>
             <span className="auth-embed-input-wrap">
@@ -329,14 +328,23 @@ export default function AuthModal({
             <span className="auth-embed-input-wrap">
               <Lock className="auth-embed-icon" size={16} />
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 placeholder="Enter your password"
                 autoComplete={tab === 'signup' ? 'new-password' : 'current-password'}
-                className="auth-embed-input"
+                className="auth-embed-input auth-embed-input--with-toggle"
               />
+              <button
+                type="button"
+                className="auth-embed-toggle"
+                onClick={() => setShowPassword((prev) => !prev)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                aria-pressed={showPassword}
+              >
+                {'\u{1F441}'}
+              </button>
             </span>
           </label>
 
@@ -361,16 +369,6 @@ export default function AuthModal({
           <div className="auth-embed-actions">
             <button type="submit" disabled={submitting} className="auth-embed-primary">
               {submitting ? 'Please wait...' : cta}
-            </button>
-            <div className="auth-embed-divider">Or continue with</div>
-            <button
-              type="button"
-              className="auth-embed-secondary"
-              onClick={onGoogle}
-              disabled={googleLoading}
-            >
-              <Chrome size={16} />
-              {googleLoading ? 'Redirecting...' : 'Google'}
             </button>
           </div>
         </form>
