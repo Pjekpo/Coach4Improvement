@@ -13,6 +13,7 @@ import { Analytics } from '@/lib/analytics';
 import { toast } from 'sonner@2.0.3';
 
 const timeSlots = Array.from({ length: 9 }, (_, i) => `${String(9 + i).padStart(2, '0')}:00`);
+const formspreeBookingEndpoint = 'https://formspree.io/f/mojvkzad';
 
 const schema = z.object({
   date: z.date(),
@@ -76,6 +77,44 @@ export default function BookingPage() {
     return timeSlots.every((slot) => slots.has(slot));
   };
 
+  const normalizeSlot = (value?: string | null) => value?.trim() || 'ALL';
+
+  const sendBookingToFormspree = async (payload: {
+    fullName: string;
+    phone: string;
+    serviceNeed: string;
+    dateLabel: string;
+    timeSlot: string;
+    notes?: string;
+    email?: string;
+  }) => {
+    const formData = new FormData();
+    formData.append('_subject', 'New consultation booking');
+    formData.append('fullName', payload.fullName);
+    formData.append('phone', payload.phone);
+    formData.append('serviceNeed', payload.serviceNeed);
+    formData.append('date', payload.dateLabel);
+    formData.append('timeSlot', payload.timeSlot);
+    if (payload.notes) {
+      formData.append('notes', payload.notes);
+    }
+    if (payload.email) {
+      formData.append('email', payload.email);
+    }
+
+    const res = await fetch(formspreeBookingEndpoint, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        Accept: 'application/json',
+      },
+    });
+
+    if (!res.ok) {
+      throw new Error('Formspree submission failed');
+    }
+  };
+
   useEffect(() => {
     if (!supabaseReady || !supabase) return;
     const client = supabase;
@@ -88,9 +127,9 @@ export default function BookingPage() {
         const map: SlotMap = {};
         data.forEach((row: any) => {
           const key = (row.date as string).split('T')[0];
-          const slot = (row.time_slot as string | null | undefined) ?? 'ALL';
+          const slot = normalizeSlot(row.time_slot as string | null | undefined);
           if (!map[key]) map[key] = new Set();
-          map[key].add(slot.trim() || 'ALL');
+          map[key].add(slot);
         });
         setBookedSlots(map);
         const fully = Object.entries(map)
@@ -134,6 +173,75 @@ export default function BookingPage() {
     });
   };
 
+  const removeBookedState = (key: string, slot: string) => {
+    setBookedSlots((prev) => {
+      const next: SlotMap = { ...prev };
+      const set = new Set(next[key] ?? []);
+      set.delete(slot);
+      if (set.size === 0) {
+        delete next[key];
+      } else {
+        next[key] = set;
+      }
+      setUnavailableDates((prevDates) => {
+        const nextDates = new Set(prevDates);
+        if (set.size === 0 || !isFullyBooked(key, set)) {
+          nextDates.delete(key);
+        } else {
+          nextDates.add(key);
+        }
+        return nextDates;
+      });
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    if (!supabaseReady || !supabase) return;
+    const client = supabase;
+    const channel = client
+      .channel('bookings-realtime')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'bookings' },
+        (payload) => {
+          const row = payload.new as { date?: string | null; time_slot?: string | null };
+          if (!row?.date) return;
+          const key = row.date.split('T')[0];
+          updateBookedState(key, normalizeSlot(row.time_slot));
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'DELETE', schema: 'public', table: 'bookings' },
+        (payload) => {
+          const row = payload.old as { date?: string | null; time_slot?: string | null };
+          if (!row?.date) return;
+          const key = row.date.split('T')[0];
+          removeBookedState(key, normalizeSlot(row.time_slot));
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'bookings' },
+        (payload) => {
+          const oldRow = payload.old as { date?: string | null; time_slot?: string | null };
+          const newRow = payload.new as { date?: string | null; time_slot?: string | null };
+          if (oldRow?.date) {
+            removeBookedState(oldRow.date.split('T')[0], normalizeSlot(oldRow.time_slot));
+          }
+          if (newRow?.date) {
+            updateBookedState(newRow.date.split('T')[0], normalizeSlot(newRow.time_slot));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      client.removeChannel(channel);
+    };
+  }, [supabaseReady]);
+
   const completeBooking = async () => {
     const parsed = schema.safeParse({
       date,
@@ -169,8 +277,26 @@ export default function BookingPage() {
       return;
     }
 
+    const existingCheck = await supabase
+      .from('bookings')
+      .select('id')
+      .eq('date', bookingPayload.date)
+      .eq('time_slot', parsedSlot)
+      .limit(1);
+
+    if (!existingCheck.error && existingCheck.data?.length) {
+      updateBookedState(dateKey(parsedDate), parsedSlot);
+      toast.error('That time slot was just booked. Please choose another.');
+      return;
+    }
+
     const { error } = await supabase.from('bookings').insert([bookingPayload]);
     if (error) {
+      if (error.code === '23505') {
+        updateBookedState(dateKey(parsedDate), parsedSlot);
+        toast.error('That time slot was just booked. Please choose another.');
+        return;
+      }
       toast.error('Unable to save your booking. Please try again.');
       return;
     }
@@ -186,6 +312,24 @@ export default function BookingPage() {
     ]
       .filter(Boolean)
       .join('\n');
+
+    try {
+      await sendBookingToFormspree({
+        fullName: parsed.data.fullName,
+        phone: parsed.data.phone,
+        serviceNeed: parsed.data.serviceNeed,
+        dateLabel: parsedDate.toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+        }),
+        timeSlot: parsedSlot,
+        notes: parsed.data.notes ?? undefined,
+        email: user?.email ?? undefined,
+      });
+    } catch {
+      toast.error('Booking saved, but we could not send the email notification.');
+    }
 
     const pushToGoogleCalendar = async () => {
       if (!session?.provider_token) return false;
