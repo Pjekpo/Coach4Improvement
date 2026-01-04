@@ -33,44 +33,13 @@ export default function BookingPage() {
   const [phone, setPhone] = useState('');
   const [serviceNeed, setServiceNeed] = useState('');
   const [notes, setNotes] = useState('');
-  const { user, session } = useAuth();
+  const { user } = useAuth();
   const isSignedIn = !!user;
   const [unavailableDates, setUnavailableDates] = useState<Set<string>>(new Set());
   const [bookedSlots, setBookedSlots] = useState<SlotMap>({});
   const supabaseReady = supabaseConfigured && !!supabase;
 
   const dateKey = (d: Date) => d.toISOString().split('T')[0];
-
-  const toGCalDateTime = (d: Date) => {
-    const year = d.getFullYear();
-    const month = `${d.getMonth() + 1}`.padStart(2, "0");
-    const day = `${d.getDate()}`.padStart(2, "0");
-    const hours = `${d.getHours()}`.padStart(2, "0");
-    const minutes = `${d.getMinutes()}`.padStart(2, "0");
-    return `${year}${month}${day}T${hours}${minutes}00`;
-  };
-
-  const buildGoogleCalendarUrl = (d: Date, slot?: string, detail?: string) => {
-    const startDateTime = new Date(d);
-    if (slot) {
-      const [h, m] = slot.split(':').map((n) => Number(n));
-      startDateTime.setHours(h, m ?? 0, 0, 0);
-    }
-    const endDateTime = new Date(startDateTime);
-    endDateTime.setHours(startDateTime.getHours() + 1);
-    const start = toGCalDateTime(startDateTime);
-    const end = toGCalDateTime(endDateTime);
-    const params = new URLSearchParams({
-      action: "TEMPLATE",
-      text: "Consultation with Coach4Improvement",
-      dates: `${start}/${end}`,
-      details:
-        detail ??
-        "Booked via Coach4Improvement. We will confirm meeting details shortly.",
-      location: "Online meeting",
-    });
-    return `https://calendar.google.com/calendar/u/0/r/eventedit?${params.toString()}`;
-  };
 
   const isFullyBooked = (key: string, slots: Set<string>) => {
     if (slots.has('ALL')) return true;
@@ -304,14 +273,6 @@ export default function BookingPage() {
     Analytics.BookingCompleted();
     toast.success('Booking confirmed! A confirmation email will be sent shortly.');
     updateBookedState(dateKey(parsedDate), parsedSlot);
-    const detail = [
-      `Booked by: ${parsed.data.fullName}`,
-      `Phone: ${parsed.data.phone}`,
-      `Service: ${parsed.data.serviceNeed}`,
-      parsed.data.notes ? `Notes: ${parsed.data.notes}` : null,
-    ]
-      .filter(Boolean)
-      .join('\n');
 
     try {
       await sendBookingToFormspree({
@@ -329,46 +290,6 @@ export default function BookingPage() {
       });
     } catch {
       toast.error('Booking saved, but we could not send the email notification.');
-    }
-
-    const pushToGoogleCalendar = async () => {
-      if (!session?.provider_token) return false;
-      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      const start = new Date(parsedDate);
-      const [h, m] = parsedSlot.split(':').map((n) => Number(n));
-      start.setHours(h, m ?? 0, 0, 0);
-      const end = new Date(start);
-      end.setHours(start.getHours() + 1);
-
-      const payload = {
-        summary: 'Consultation - Coach4Improvement',
-        description: detail,
-        start: { dateTime: start.toISOString(), timeZone: tz },
-        end: { dateTime: end.toISOString(), timeZone: tz },
-        reminders: { useDefault: true },
-      };
-
-      const res = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${session.provider_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) throw new Error('Google Calendar event failed');
-      return true;
-    };
-
-    try {
-      const pushed = await pushToGoogleCalendar();
-      if (!pushed) {
-        const url = buildGoogleCalendarUrl(parsedDate, parsedSlot, detail);
-        window.open(url, "_blank", "noopener,noreferrer");
-      }
-    } catch {
-      const url = buildGoogleCalendarUrl(parsedDate, parsedSlot, detail);
-      window.open(url, "_blank", "noopener,noreferrer");
     }
   };
 
