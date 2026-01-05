@@ -17,6 +17,7 @@ import ResourcesPage from "./components/ResourcesPage";
 import { BookingModal } from "./components/BookingModal";
 import { Toaster } from "./components/ui/sonner";
 import AuthCallback from "./pages/AuthCallback";
+import SetPassword from "./pages/SetPassword";
 
 function RoutedApp() {
   const navigate = useNavigate();
@@ -49,6 +50,7 @@ function RoutedApp() {
           <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
           <Route path="/terms-of-service" element={<TermsOfServicePage />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/auth/set-password" element={<SetPassword />} />
           <Route path="/booking" element={<BookingPage />} />
         </Routes>
       </main>
