@@ -1,5 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
+import type { CSSProperties } from "react";
+import { Fragment } from "react";
 import {
   AlertTriangle,
   Activity,
@@ -24,12 +26,15 @@ import {
   MessageSquare,
   Minus,
   Moon,
+  Download,
   Pill,
   Printer,
   Bath,
   RefreshCcw,
   RotateCcw,
   Shield,
+  ChevronDown,
+  ChevronUp,
   Sunrise,
   Syringe,
   UserCheck,
@@ -505,12 +510,732 @@ function Icon({ name, className }: { name: IconName; className?: string }) {
   return <Component className={className} />;
 }
 
+type PostFallFieldValue = string | boolean;
+
+const POST_FALL_INTERVALS = [
+  { id: "h1", label: "Hr 1", sub: "1h post" },
+  { id: "h2", label: "Hr 2", sub: "2h post" },
+  { id: "h3", label: "Hr 3", sub: "3h post" },
+  { id: "h4", label: "Hr 4", sub: "4h post" },
+  { id: "h6", label: "Hr 6", sub: "6h post", phase: "PHASE 2: 2-HOURLY" },
+  { id: "h8", label: "Hr 8", sub: "8h post" },
+  { id: "h12", label: "Hr 12", sub: "12h post", phase: "PHASE 3: 4-HOURLY (TO 24 HRS)" },
+  { id: "h16", label: "Hr 16", sub: "16h post" },
+  { id: "h20", label: "Hr 20", sub: "20h post" },
+  { id: "h24", label: "Hr 24", sub: "Completion" },
+] as const;
+
+const POST_FALL_PRINT_STYLES = `
+  @media print {
+    body[data-print-section="care-plan-quality-audit"] #post-fall-monitoring-chart {
+      display: none !important;
+    }
+
+    body[data-print-section="post-fall-monitoring-chart"] .care-plan-audit-shell {
+      display: none !important;
+    }
+
+    body[data-print-section="post-fall-monitoring-chart"] #post-fall-monitoring-chart {
+      display: block !important;
+    }
+
+    body[data-print-section="post-fall-monitoring-chart"] .post-fall-no-print {
+      display: none !important;
+    }
+
+    body[data-print-section="post-fall-monitoring-chart"] .post-fall-section-card {
+      break-inside: avoid;
+    }
+  }
+`;
+
+const POST_FALL_LAYOUT_STYLES = `
+  .post-fall-layout {
+    display: block;
+    max-width: 1152px;
+    margin: 0 auto;
+  }
+
+  .post-fall-sidebar {
+    width: 100%;
+    margin-bottom: 24px;
+  }
+
+  .post-fall-main {
+    min-width: 0;
+  }
+
+  @media (min-width: 960px) {
+    .post-fall-layout {
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    .post-fall-sidebar {
+      width: 320px;
+      margin-bottom: 0;
+    }
+  }
+`;
+
+function createInitialPostFallFormState(): Record<string, PostFallFieldValue> {
+  const initialState: Record<string, PostFallFieldValue> = {
+    res_name: "",
+    res_nhs: "",
+    res_dob: "",
+    fall_time: "",
+    risk_avpu: "Alert",
+    risk_meds: "No",
+    risk_call: "No",
+    final_summary: "",
+    check_stable: false,
+    check_plan: false,
+    signer_name: "",
+  };
+
+  POST_FALL_INTERVALS.forEach((interval) => {
+    initialState[`${interval.id}_time`] = "";
+    initialState[`${interval.id}_avpu`] = "";
+    initialState[`${interval.id}_pupils`] = "";
+    initialState[`${interval.id}_vitals`] = "";
+    initialState[`${interval.id}_staff`] = "";
+  });
+
+  return initialState;
+}
+
+function PostFallMonitoringChart() {
+  const initialState = useMemo(() => createInitialPostFallFormState(), []);
+  const [formData, setFormData] = useState<Record<string, PostFallFieldValue>>(initialState);
+
+  const isDirty = useMemo(
+    () => Object.keys(initialState).some((key) => formData[key] !== initialState[key]),
+    [formData, initialState]
+  );
+
+  useEffect(() => {
+    if (!isDirty) return;
+
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [isDirty]);
+
+  const setField = (field: string, value: PostFallFieldValue) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handlePrint = () => {
+    const previousTitle = document.title;
+    const residentName = String(formData.res_name || "").trim();
+    const reportTitle = residentName ? `POST-FALL MONITORING CHART - ${residentName}` : "POST-FALL MONITORING CHART";
+
+    const restore = () => {
+      document.title = previousTitle;
+      document.body.removeAttribute("data-print-section");
+      window.removeEventListener("afterprint", restore);
+    };
+
+    document.body.setAttribute("data-print-section", "post-fall-monitoring-chart");
+    document.title = reportTitle;
+    window.addEventListener("afterprint", restore);
+    window.print();
+    window.setTimeout(restore, 1000);
+  };
+
+  const handleDownloadCsv = () => {
+    const csvRows = ["Field ID,Value"];
+    Object.keys(initialState).forEach((key) => {
+      const value = formData[key];
+      const csvValue =
+        typeof value === "boolean"
+          ? String(value)
+          : `"${String(value).replace(/"/g, '""')}"`;
+      csvRows.push(`${key},${csvValue}`);
+    });
+
+    const blob = new Blob([csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const residentName = String(formData.res_name || "").trim() || "Resident";
+    const fileName = `Post_Fall_${residentName.replace(/\s+/g, "_")}_${new Date().toISOString().split("T")[0]}.csv`;
+
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleReset = () => {
+    if (window.confirm("DANGER: This will permanently erase all data on this page. Continue?")) {
+      setFormData(initialState);
+    }
+  };
+
+  const inputClassName =
+    "mt-1 w-full text-sm text-slate-800 outline-none transition focus:ring-2 focus:ring-[#dbe7ff]";
+
+  const toolPrimaryButtonStyle: CSSProperties = {
+    display: "flex",
+    width: "100%",
+    height: "50px",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "10px",
+    borderRadius: "5px",
+    border: "0",
+    cursor: "pointer",
+    fontSize: "16px",
+    fontWeight: 700,
+    lineHeight: 1,
+  };
+
+  const printButtonBaseColor = "#3267dd";
+  const printButtonHoverColor = "#214fb8";
+  const downloadButtonBaseColor = "#20a747";
+  const downloadButtonHoverColor = "#187d36";
+  const clearButtonBaseColor = "#f2f2f4";
+  const clearButtonHoverColor = "#dfe1e6";
+
+  const toolIconStyle: CSSProperties = {
+    width: "18px",
+    height: "18px",
+    flex: "0 0 auto",
+  };
+
+  const postFallSectionHeadingStyle: CSSProperties = {
+    margin: 0,
+    color: "#234fc7",
+    fontSize: "13px",
+    fontWeight: 800,
+    textTransform: "uppercase",
+    letterSpacing: "0.01em",
+  };
+
+  const postFallFieldLabelStyle: CSSProperties = {
+    display: "block",
+    color: "#6b7280",
+    fontSize: "12px",
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: "0.02em",
+  };
+
+  const postFallFieldStyle: CSSProperties = {
+    width: "100%",
+    minHeight: "44px",
+    borderRadius: "8px",
+    border: "1px solid #c5ccd6",
+    backgroundColor: "#ffffff",
+    padding: "10px 12px",
+    fontSize: "16px",
+    lineHeight: 1.2,
+    boxSizing: "border-box",
+  };
+
+  const postFallMainTitleStyle: CSSProperties = {
+    margin: 0,
+    color: "#000000",
+    fontSize: "36px",
+    fontWeight: 900,
+    lineHeight: 1.05,
+    textTransform: "uppercase",
+    letterSpacing: "-0.02em",
+  };
+
+  const postFallTableHeaderCellStyle: CSSProperties = {
+    border: "1px solid #d6dbe1",
+    backgroundColor: "#dfe5ef",
+    padding: "12px 10px",
+    color: "#1e429f",
+    fontSize: "12px",
+    fontWeight: 800,
+    textTransform: "uppercase",
+    textAlign: "left",
+  };
+
+  const postFallTablePhaseCellStyle: CSSProperties = {
+    border: "1px solid #d6dbe1",
+    backgroundColor: "#f7f8fa",
+    padding: "8px 10px",
+    color: "#000000",
+    fontSize: "12px",
+    fontWeight: 800,
+    textTransform: "uppercase",
+    textAlign: "center",
+  };
+
+  const formToolsHeadingStyle: CSSProperties = {
+    display: "flex",
+    alignItems: "center",
+    margin: "0 0 18px",
+    color: "#1f2937",
+    fontSize: "18px",
+    fontWeight: 800,
+    lineHeight: 1.2,
+    letterSpacing: "0",
+  };
+
+  const postFallTextareaStyle: CSSProperties = {
+    ...postFallFieldStyle,
+    minHeight: "96px",
+    padding: "12px",
+    resize: "vertical",
+  };
+
+  const postFallTableInputStyle: CSSProperties = {
+    width: "100%",
+    minHeight: "32px",
+    borderRadius: "6px",
+    border: "1px solid #d6dbe1",
+    backgroundColor: "#ffffff",
+    padding: "4px 8px",
+    fontSize: "12px",
+    lineHeight: 1.2,
+    boxSizing: "border-box",
+  };
+
+  return (
+    <section
+      id="post-fall-monitoring-chart"
+      style={{ marginTop: "56px", marginBottom: "32px", backgroundColor: "#e8e8e8", borderRadius: "28px", padding: "18px" }}
+    >
+      <div className="post-fall-layout">
+        <aside
+          className="post-fall-no-print post-fall-sidebar"
+          style={{ position: "sticky", top: "16px", height: "fit-content", zIndex: 20 }}
+        >
+          <div
+            className="rounded-[14px] bg-white"
+            style={{
+              borderTop: "4px solid #3267dd",
+              boxShadow: "0 2px 8px rgba(15, 23, 42, 0.12)",
+              padding: "18px 14px 18px",
+            }}
+          >
+            <h3 style={formToolsHeadingStyle}>
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 18 18"
+                style={{ width: "18px", height: "18px", marginRight: "12px", flex: "0 0 auto" }}
+              >
+                <line x1="3" y1="1.5" x2="3" y2="16.5" stroke="#1f2937" strokeWidth="1.7" strokeLinecap="round" />
+                <line x1="9" y1="1.5" x2="9" y2="16.5" stroke="#1f2937" strokeWidth="1.7" strokeLinecap="round" />
+                <line x1="15" y1="1.5" x2="15" y2="16.5" stroke="#1f2937" strokeWidth="1.7" strokeLinecap="round" />
+                <circle cx="3" cy="6" r="1.9" fill="#ffffff" stroke="#1f2937" strokeWidth="1.5" />
+                <circle cx="9" cy="11" r="1.9" fill="#ffffff" stroke="#1f2937" strokeWidth="1.5" />
+                <circle cx="15" cy="5" r="1.9" fill="#ffffff" stroke="#1f2937" strokeWidth="1.5" />
+              </svg>
+              Form Tools
+            </h3>
+            <div style={{ paddingLeft: "2px", paddingRight: "2px" }}>
+              <button
+                type="button"
+                onClick={handlePrint}
+                onMouseEnter={(event) => {
+                  event.currentTarget.style.backgroundColor = printButtonHoverColor;
+                }}
+                onMouseLeave={(event) => {
+                  event.currentTarget.style.backgroundColor = printButtonBaseColor;
+                }}
+                onFocus={(event) => {
+                  event.currentTarget.style.backgroundColor = printButtonHoverColor;
+                }}
+                onBlur={(event) => {
+                  event.currentTarget.style.backgroundColor = printButtonBaseColor;
+                }}
+                style={{
+                  ...toolPrimaryButtonStyle,
+                  marginBottom: "14px",
+                  backgroundColor: printButtonBaseColor,
+                  color: "#ffffff",
+                  transition: "background-color 160ms ease",
+                }}
+              >
+                <Printer style={toolIconStyle} />
+                Print to PDF
+              </button>
+              <button
+                type="button"
+                onClick={handleDownloadCsv}
+                onMouseEnter={(event) => {
+                  event.currentTarget.style.backgroundColor = downloadButtonHoverColor;
+                }}
+                onMouseLeave={(event) => {
+                  event.currentTarget.style.backgroundColor = downloadButtonBaseColor;
+                }}
+                onFocus={(event) => {
+                  event.currentTarget.style.backgroundColor = downloadButtonHoverColor;
+                }}
+                onBlur={(event) => {
+                  event.currentTarget.style.backgroundColor = downloadButtonBaseColor;
+                }}
+                style={{
+                  ...toolPrimaryButtonStyle,
+                  marginBottom: "14px",
+                  backgroundColor: downloadButtonBaseColor,
+                  color: "#ffffff",
+                  transition: "background-color 160ms ease",
+                }}
+              >
+                <Download style={toolIconStyle} />
+                Download Data
+              </button>
+              <div style={{ borderTop: "1px solid #e4e7eb", marginTop: "4px", marginBottom: "2px" }} />
+              <button
+                type="button"
+                onClick={handleReset}
+                onMouseEnter={(event) => {
+                  event.currentTarget.style.backgroundColor = clearButtonHoverColor;
+                }}
+                onMouseLeave={(event) => {
+                  event.currentTarget.style.backgroundColor = clearButtonBaseColor;
+                }}
+                onFocus={(event) => {
+                  event.currentTarget.style.backgroundColor = clearButtonHoverColor;
+                }}
+                onBlur={(event) => {
+                  event.currentTarget.style.backgroundColor = clearButtonBaseColor;
+                }}
+                style={{
+                  display: "block",
+                  width: "100%",
+                  height: "44px",
+                  marginTop: "16px",
+                  borderRadius: "5px",
+                  border: "0",
+                  backgroundColor: clearButtonBaseColor,
+                  color: "#5f6671",
+                  cursor: "pointer",
+                  fontSize: "16px",
+                  fontWeight: 500,
+                  lineHeight: 1,
+                  transition: "background-color 160ms ease",
+                }}
+              >
+                Clear All Data
+              </button>
+            </div>
+            <div
+              style={{
+                marginTop: "30px",
+                borderRadius: "6px",
+                backgroundColor: "#dfe5ef",
+                padding: "14px 14px 13px",
+                color: "#2952b8",
+                fontSize: "14px",
+                lineHeight: 1.55,
+              }}
+            >
+              <strong style={{ fontWeight: 800 }}>Note:</strong> Data is not saved automatically. Download your data or print to PDF before closing this window.
+            </div>
+          </div>
+        </aside>
+
+        <main className="post-fall-main">
+          <header
+            className="mb-8 rounded-xl bg-white px-6 py-8 text-center shadow-sm"
+            style={{ borderBottom: "4px solid #3267dd", boxShadow: "0 1px 3px rgba(15, 23, 42, 0.12)" }}
+          >
+            <h1 style={postFallMainTitleStyle}>POST-FALL MONITORING CHART</h1>
+            <p className="mt-1 text-[15px] font-medium text-slate-700">24-Hour Observation Record (NICE / CQC Compliant)</p>
+          </header>
+
+          <section
+            className="post-fall-section-card mb-6 rounded-xl bg-white p-6 shadow-sm"
+            style={{ border: "1px solid #d7dadd", boxShadow: "0 1px 3px rgba(15, 23, 42, 0.1)" }}
+          >
+            <h2 className="mb-4 border-b border-[#d8dde4] pb-2" style={postFallSectionHeadingStyle}>
+              1. Resident & Incident Details
+            </h2>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div>
+                <label style={postFallFieldLabelStyle}>Full Name</label>
+                <input
+                  type="text"
+                  value={String(formData.res_name || "")}
+                  onChange={(event) => setField("res_name", event.target.value)}
+                  className={inputClassName}
+                  style={postFallFieldStyle}
+                />
+              </div>
+              <div>
+                <label style={postFallFieldLabelStyle}>NHS Number</label>
+                <input
+                  type="text"
+                  value={String(formData.res_nhs || "")}
+                  onChange={(event) => setField("res_nhs", event.target.value)}
+                  className={inputClassName}
+                  style={postFallFieldStyle}
+                />
+              </div>
+              <div>
+                <label style={postFallFieldLabelStyle}>DOB</label>
+                <input
+                  type="date"
+                  value={String(formData.res_dob || "")}
+                  onChange={(event) => setField("res_dob", event.target.value)}
+                  className={inputClassName}
+                  style={postFallFieldStyle}
+                />
+              </div>
+              <div>
+                <label style={postFallFieldLabelStyle}>Date/Time Discovered</label>
+                <input
+                  type="datetime-local"
+                  value={String(formData.fall_time || "")}
+                  onChange={(event) => setField("fall_time", event.target.value)}
+                  className={inputClassName}
+                  style={postFallFieldStyle}
+                />
+              </div>
+            </div>
+          </section>
+
+          <section
+            className="post-fall-section-card mb-6 rounded-xl bg-white p-6 shadow-sm"
+            style={{ border: "1px solid #d7dadd", boxShadow: "0 1px 3px rgba(15, 23, 42, 0.1)" }}
+          >
+            <h2 className="mb-4 border-b border-[#d8dde4] pb-2" style={postFallSectionHeadingStyle}>
+              2. Initial Assessment & Risk
+            </h2>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div>
+                <label style={postFallFieldLabelStyle}>Baseline AVPU</label>
+                <select
+                  value={String(formData.risk_avpu || "Alert")}
+                  onChange={(event) => setField("risk_avpu", event.target.value)}
+                  className={inputClassName}
+                  style={postFallFieldStyle}
+                >
+                  <option>Alert</option>
+                  <option>Voice</option>
+                  <option>Pain</option>
+                  <option>Unresponsive</option>
+                </select>
+              </div>
+              <div>
+                <label style={postFallFieldLabelStyle}>Anticoagulants?</label>
+                <select
+                  value={String(formData.risk_meds || "No")}
+                  onChange={(event) => setField("risk_meds", event.target.value)}
+                  className={inputClassName}
+                  style={postFallFieldStyle}
+                >
+                  <option value="No">No</option>
+                  <option value="Yes">Yes (High Risk)</option>
+                </select>
+              </div>
+              <div>
+                <label style={postFallFieldLabelStyle}>Emergency Call?</label>
+                <select
+                  value={String(formData.risk_call || "No")}
+                  onChange={(event) => setField("risk_call", event.target.value)}
+                  className={inputClassName}
+                  style={postFallFieldStyle}
+                >
+                  <option value="No">No</option>
+                  <option value="999">999 Called</option>
+                  <option value="111">111 Called</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <section className="post-fall-section-card mb-6 rounded-2xl bg-white p-6 shadow-sm">
+            <div className="mb-4 flex items-center justify-between border-b border-[#d8dde4] pb-2">
+              <h2 style={postFallSectionHeadingStyle}>3. 24-Hour Observation Schedule</h2>
+            </div>
+
+            <div
+              style={{
+                marginBottom: "16px",
+                borderLeft: "4px solid #ef4444",
+                backgroundColor: "#f9eded",
+                padding: "12px 14px",
+              }}
+            >
+              <p
+                style={{
+                  margin: 0,
+                  color: "#c62828",
+                  fontSize: "12px",
+                  fontWeight: 800,
+                  textTransform: "uppercase",
+                }}
+              >
+                ⚠ Escalation Triggers (999):
+              </p>
+              <p
+                style={{
+                  margin: "6px 0 0",
+                  color: "#d32f2f",
+                  fontSize: "12px",
+                  lineHeight: 1.5,
+                }}
+              >
+                Confusion, Vomiting, Unequal Pupils, Seizure, Focal Weakness, Drowsiness.
+              </p>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse text-left text-[11px]">
+                <thead>
+                  <tr>
+                    <th style={postFallTableHeaderCellStyle}>Interval</th>
+                    <th style={postFallTableHeaderCellStyle}>Due</th>
+                    <th style={postFallTableHeaderCellStyle}>AVPU</th>
+                    <th style={postFallTableHeaderCellStyle}>Pupils</th>
+                    <th style={postFallTableHeaderCellStyle}>Vitals/Pain</th>
+                    <th style={postFallTableHeaderCellStyle}>Initials</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td colSpan={6} style={postFallTablePhaseCellStyle}>
+                      PHASE 1: HOURLY (FIRST 4 HRS)
+                    </td>
+                  </tr>
+                  {POST_FALL_INTERVALS.map((interval) => (
+                    <Fragment key={interval.id}>
+                      {interval.phase && (
+                        <tr>
+                          <td colSpan={6} style={postFallTablePhaseCellStyle}>
+                            {interval.phase}
+                          </td>
+                        </tr>
+                      )}
+                      <tr>
+                        <td className="border p-2 font-medium text-slate-700">
+                          <div>{interval.label}</div>
+                          <div className="text-[10px] text-slate-500">{interval.sub}</div>
+                        </td>
+                        <td className="border p-1">
+                          <input
+                            type="time"
+                            value={String(formData[`${interval.id}_time`] || "")}
+                            onChange={(event) => setField(`${interval.id}_time`, event.target.value)}
+                            style={postFallTableInputStyle}
+                          />
+                        </td>
+                        <td className="border p-1">
+                          <input
+                            type="text"
+                            value={String(formData[`${interval.id}_avpu`] || "")}
+                            onChange={(event) => setField(`${interval.id}_avpu`, event.target.value)}
+                            placeholder="A/V/P/U"
+                            style={postFallTableInputStyle}
+                          />
+                        </td>
+                        <td className="border p-1">
+                          <input
+                            type="text"
+                            value={String(formData[`${interval.id}_pupils`] || "")}
+                            onChange={(event) => setField(`${interval.id}_pupils`, event.target.value)}
+                            placeholder="L/R size"
+                            style={postFallTableInputStyle}
+                          />
+                        </td>
+                        <td className="border p-1">
+                          <input
+                            type="text"
+                            value={String(formData[`${interval.id}_vitals`] || "")}
+                            onChange={(event) => setField(`${interval.id}_vitals`, event.target.value)}
+                            style={postFallTableInputStyle}
+                          />
+                        </td>
+                        <td className="border p-1">
+                          <input
+                            type="text"
+                            value={String(formData[`${interval.id}_staff`] || "")}
+                            onChange={(event) => setField(`${interval.id}_staff`, event.target.value.toUpperCase())}
+                            className="uppercase"
+                            style={postFallTableInputStyle}
+                          />
+                        </td>
+                      </tr>
+                    </Fragment>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section className="post-fall-section-card rounded-2xl bg-white p-6 shadow-sm">
+            <h2 className="mb-4 border-b border-[#d8dde4] pb-2" style={postFallSectionHeadingStyle}>
+              4. Final Sign-Off (24hr Completion)
+            </h2>
+            <div className="space-y-4">
+              <div>
+                <label style={postFallFieldLabelStyle}>Summary & Behavioural Changes</label>
+                <textarea
+                  rows={3}
+                  value={String(formData.final_summary || "")}
+                  onChange={(event) => setField("final_summary", event.target.value)}
+                  className={inputClassName}
+                  style={postFallTextareaStyle}
+                />
+              </div>
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <div className="rounded-md border bg-slate-50 p-4">
+                  <p className="mb-2 text-xs font-bold uppercase text-slate-700">Checklist:</p>
+                  <div className="space-y-1 text-sm">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(formData.check_stable)}
+                        onChange={(event) => setField("check_stable", event.target.checked)}
+                      />
+                      <span>Neurologically Stable</span>
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(formData.check_plan)}
+                        onChange={(event) => setField("check_plan", event.target.checked)}
+                      />
+                      <span>Care Plan Updated</span>
+                    </label>
+                  </div>
+                </div>
+                <div className="flex flex-col justify-end">
+                  <label style={postFallFieldLabelStyle}>Manager/Lead Nurse Sign-off</label>
+                  <div className="mt-2 h-10 border-b border-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Print Name"
+                    value={String(formData.signer_name || "")}
+                    onChange={(event) => setField("signer_name", event.target.value)}
+                    className="italic shadow-none focus:ring-0"
+                    style={{ ...postFallFieldStyle, marginTop: "10px", border: "0", paddingLeft: "0", paddingRight: "0", borderRadius: "0", backgroundColor: "transparent" }}
+                  />
+                </div>
+              </div>
+            </div>
+          </section>
+        </main>
+      </div>
+    </section>
+  );
+}
+
 export function ResourcesPage() {
   const [scores, setScores] = useState<Record<string, AuditScore | undefined>>({});
   const [comments, setComments] = useState<Record<string, string>>({});
   const today = new Date().toISOString().split("T")[0];
   const [meta, setMeta] = useState({ auditor: "", serviceUser: "", date: today });
   const [openGuidance, setOpenGuidance] = useState<Record<string, boolean>>({});
+  const [openAuditSections, setOpenAuditSections] = useState<Record<string, boolean>>({});
   const [accessState, setAccessState] = useState<AccessState>("checking");
   const [accessMessage, setAccessMessage] = useState<string | null>(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
@@ -540,15 +1265,20 @@ export function ResourcesPage() {
   const toggleGuidance = (sectionId: string) => {
     setOpenGuidance((prev) => ({ ...prev, [sectionId]: !prev[sectionId] }));
   };
+  const toggleAuditSection = (sectionId: string) => {
+    setOpenAuditSections((prev) => ({ ...prev, [sectionId]: !prev[sectionId] }));
+  };
   const handleExport = () => {
     const prevTitle = document.title;
     const reportTitle = meta.serviceUser ? `Care Plan Audit - ${meta.serviceUser}` : "Care Plan Audit";
     const dateSuffix = meta.date ? ` - ${meta.date}` : "";
     const restoreTitle = () => {
       document.title = prevTitle;
+      document.body.removeAttribute("data-print-section");
       window.removeEventListener("afterprint", restoreTitle);
     };
 
+    document.body.setAttribute("data-print-section", "care-plan-quality-audit");
     document.title = `${reportTitle}${dateSuffix}`;
     window.addEventListener("afterprint", restoreTitle);
     window.print();
@@ -639,6 +1369,7 @@ export function ResourcesPage() {
           content="Comprehensive PCS audit form for care providers covering CQC and NICE aligned checks across care planning, safety, and governance."
         />
         <link rel="canonical" href="https://coach4improvement.co.uk/resources" />
+        <style>{`${POST_FALL_PRINT_STYLES}\n${POST_FALL_LAYOUT_STYLES}`}</style>
       </Helmet>
       <div className="relative max-w-6xl mx-auto p-4 md:py-12">
         {accessState !== "allowed" && (
@@ -711,6 +1442,7 @@ export function ResourcesPage() {
             pointerEvents: accessState === "allowed" ? "auto" : "none",
           }}
         >
+          <div className="care-plan-audit-shell">
           <div
             className="mb-8 overflow-hidden shadow-lg"
             style={{ borderColor: "transparent", borderRadius: "24px" }}
@@ -1010,72 +1742,90 @@ export function ResourcesPage() {
               className="bg-white shadow-sm overflow-hidden"
               style={{ borderRadius: "18px", border: "1px solid #eef2f7", fontFamily: '"Poppins", "Segoe UI", sans-serif', position: "relative" }}
             >
-              <div className="px-6 pt-6 pb-4">
-                {(() => {
-                  const isOpen = Boolean(openGuidance[section.id]);
-                  return (
-                    <button
-                      type="button"
-                      onClick={() => toggleGuidance(section.id)}
-                      className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-[10px] font-semibold uppercase"
-                      style={{
-                        backgroundColor: "#f3f6fb",
-                        color: "#7b8798",
-                        letterSpacing: "0.18em",
-                        border: "1px solid #e7edf5",
-                        position: "absolute",
-                        top: "16px",
-                        right: "16px",
-                        zIndex: 2,
-                      }}
-                    >
-                      <Info className="h-4 w-4" style={{ color: "#94a3b8" }} />
-                      {isOpen ? "Hide Clinical Guidance" : "View Clinical Guidance"}
-                    </button>
-                  );
-                })()}
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                  <div className="flex items-start gap-3">
-                    <div
-                      className="flex items-center justify-center"
-                      style={{
-                        backgroundColor: "transparent",
-                        border: "none",
-                        color: section.iconColor || "#4F46E5",
-                        width: "28px",
-                        height: "28px",
-                      }}
-                    >
-                      {section.id === "reviews" ? (
-                        <ClipboardCheck className="w-6 h-6" />
-                      ) : (
-                        <Icon name={section.icon} className="w-6 h-6" />
-                      )}
+              {(() => {
+                const isExpanded = Boolean(openAuditSections[section.id]);
+                const isGuidanceOpen = Boolean(openGuidance[section.id]);
+
+                return (
+                  <>
+                    <div className="px-6 pt-6 pb-5">
+                      <div className="flex flex-wrap items-start justify-between gap-4">
+                        <div className="flex min-w-0 flex-1 items-start gap-3">
+                          <div
+                            className="flex items-center justify-center"
+                            style={{
+                              backgroundColor: "transparent",
+                              border: "none",
+                              color: section.iconColor || "#4F46E5",
+                              width: "28px",
+                              height: "28px",
+                            }}
+                          >
+                            {section.id === "reviews" ? (
+                              <ClipboardCheck className="w-6 h-6" />
+                            ) : (
+                              <Icon name={section.icon} className="w-6 h-6" />
+                            )}
+                          </div>
+                          <div style={{ minWidth: 0 }}>
+                            <h2
+                              className="text-[15px] font-black tracking-[0.02em]"
+                              style={{ color: "#1f2a3a", margin: 0, textTransform: "uppercase" }}
+                            >
+                              {section.id === "reviews" ? "Care Plan Reviews & 'No Change' Audit" : section.title}
+                            </h2>
+                            <p
+                              className="text-[8px] font-semibold uppercase"
+                              style={{
+                                color: "#4F46E5",
+                                letterSpacing: "0.04em",
+                                marginTop: "4px",
+                                fontFamily: "\"Times New Roman\", Times, serif",
+                              }}
+                            >
+                              {section.id === "reviews" ? "CQC Regulation 17 (Good Governance)" : section.cqc}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="ml-auto flex flex-wrap items-center justify-end gap-3">
+                          {isExpanded && (
+                            <button
+                              type="button"
+                              onClick={() => toggleGuidance(section.id)}
+                              className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-[10px] font-semibold uppercase"
+                              style={{
+                                backgroundColor: "#f3f6fb",
+                                color: "#7b8798",
+                                letterSpacing: "0.18em",
+                                border: "1px solid #e7edf5",
+                              }}
+                            >
+                              <Info className="h-4 w-4" style={{ color: "#94a3b8" }} />
+                              {isGuidanceOpen ? "Hide Clinical Guidance" : "View Clinical Guidance"}
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => toggleAuditSection(section.id)}
+                            className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-[10px] font-semibold uppercase"
+                            style={{
+                              backgroundColor: isExpanded ? "#1f2a3a" : "#edf2ff",
+                              color: isExpanded ? "#ffffff" : "#4F46E5",
+                              letterSpacing: "0.18em",
+                              border: isExpanded ? "1px solid #1f2a3a" : "1px solid #d6ddff",
+                            }}
+                          >
+                            {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                            {isExpanded ? "Collapse Section" : "Open Section"}
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                    <div style={{ minWidth: 0 }}>
-                      <h2
-                        className="text-[15px] font-black tracking-[0.02em]"
-                        style={{ color: "#1f2a3a", margin: 0, textTransform: "uppercase" }}
-                      >
-                        {section.id === "reviews" ? "Care Plan Reviews & 'No Change' Audit" : section.title}
-                      </h2>
-                      <p
-                        className="text-[8px] font-semibold uppercase"
-                        style={{
-                          color: "#4F46E5",
-                          letterSpacing: "0.04em",
-                          marginTop: "4px",
-                          fontFamily: "\"Times New Roman\", Times, serif",
-                        }}
-                      >
-                        {section.id === "reviews" ? "CQC Regulation 17 (Good Governance)" : section.cqc}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                {openGuidance[section.id] && (
+                    {isExpanded && (
+                      <>
+                {isGuidanceOpen && (
                   <div
-                    className="mt-5 rounded-2xl border p-6"
+                    className="mx-6 rounded-2xl border p-6"
                     style={{ borderColor: "#e2e8f0", backgroundColor: "#f8fafc", fontFamily: "\"Times New Roman\", Times, serif" }}
                   >
                     <div className="grid gap-6 md:grid-cols-2">
@@ -1118,7 +1868,7 @@ export function ResourcesPage() {
                   </div>
                 )}
                 <div
-                  className="mt-6 text-[10px] font-semibold uppercase"
+                  className="mx-6 mt-6 text-[10px] font-semibold uppercase"
                   style={{
                     color: "#8f9bb0",
                     letterSpacing: "0.24em",
@@ -1134,8 +1884,7 @@ export function ResourcesPage() {
                   <span style={{ textAlign: "center" }}>No</span>
                   <span style={{ textAlign: "center" }}>N/A</span>
                 </div>
-              </div>
-              <div style={{ borderTop: "1px solid #eef2f7" }}>
+              <div style={{ borderTop: "1px solid #eef2f7", marginTop: "12px" }}>
                 <div className="divide-y" style={{ borderColor: "#f1f5f9" }}>
                   {section.items.map((item, i) => {
                     const key = `${section.id}-${i}`;
@@ -1256,6 +2005,11 @@ export function ResourcesPage() {
                   }
                 />
               </div>
+                      </>
+                    )}
+                  </>
+                );
+              })()}
             </section>
           ))}
         </div>
@@ -1443,6 +2197,8 @@ export function ResourcesPage() {
             </div>
           </section>
         </div>
+        </div>
+        <PostFallMonitoringChart />
       </div>
     </div>
   </div>
